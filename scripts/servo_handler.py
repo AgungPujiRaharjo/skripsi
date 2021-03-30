@@ -23,7 +23,7 @@ class Robot:
             else:
                 print("Dynamixel#%d has been successfully connected" % obj.id)
 
-    def readOne(self,IDdxl,fromDef='yes'):
+    def readOne(self,IDdxl,fromDef='yes',data='int'):
         addr_AX_Pres_pos = 36
         self.dxl[IDdxl-1].presentpos, dxl_comm_result, dxl_error = self.packetHandler.read2ByteTxRx(self.portHandler, self.dxl[IDdxl-1].id, addr_AX_Pres_pos)
         if dxl_comm_result != COMM_SUCCESS:
@@ -33,7 +33,10 @@ class Robot:
         # print("present position id %s is %s in degrees %f" %(self.dxl[IDdxl-1].id,self.dxl[IDdxl-1].presentpos,(self.dxl[IDdxl-1].presentpos*0.293)))
         
         if fromDef=='yes':
-            angle=int(round((self.dxl[IDdxl-1].presentpos*0.293)-(self.dxl[IDdxl-1].default*0.293)))
+            if data=='int':
+                angle=int(round((self.dxl[IDdxl-1].presentpos*0.293)-(self.dxl[IDdxl-1].default*0.293)))
+            elif data=='float':
+                angle=float(round((self.dxl[IDdxl-1].presentpos*0.293)-(self.dxl[IDdxl-1].default*0.293),3))
         else:
             angle=int(round(self.dxl[IDdxl-1].presentpos*0.293))
         return angle

@@ -235,14 +235,17 @@ while 1:
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
 invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
+invers(robot,dxl,'ka',0,0,18,1)
+dxl[17].moveSync(-15,1)
+dxl[8].moveSync(-14,1)
+dxl[16].moveSync(-15,1)
 robot.syncWrite()
 wait(1.5)
 
-t15=robot.readOne(15)
-t16=robot.readOne(16)
-# t11=robot.readOne(11)
-# t12=robot.readOne(12)
+t15=robot.readOne(15,data='float')
+t16=robot.readOne(16,data='float')
+t11=robot.readOne(11,data='float')
+t12=robot.readOne(12,data='float')
 
 angleData=[]
 comX=[]
@@ -257,15 +260,16 @@ while(1):
     print("uji pitch semakin positif-----Press any key to continue! (or press ESC to quit!)")
     if getch() == chr(0x1b):
         break
-    
-    angleData.append(angle)
-    print("angle:",angle)
+    s16=robot.readOne(16,data='float')
+
+    angleData.append(s16-t16)
+    print("angle:",s16-t16)
 
     #kirim servo engkel pitch
-    dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
+    # dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
     dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
-    # dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
-    # dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
+    dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
+    dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
     robot.syncWrite()
     wait(0.5)
 
@@ -284,28 +288,30 @@ while(1):
     
 angle=0
 invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
+invers(robot,dxl,'ka',0,0,18,1)
 robot.syncWrite()
 wait(1.5)
 
-t15=robot.readOne(15)
-t16=robot.readOne(16)
-# t11=robot.readOne(11)
-# t12=robot.readOne(12)
+t15=robot.readOne(15,data='float')
+t16=robot.readOne(16,data='float')
+t11=robot.readOne(11,data='float')
+t12=robot.readOne(12,data='float')
 
 while(1):
     print("uji pitch semakin negatif-----Press any key to continue! (or press ESC to quit!)")
     if getch() == chr(0x1b):
         break
     
-    angleData.append(angle)
-    print("angle:",angle)
+    s16=robot.readOne(16,data='float')
+
+    angleData.append(s16-t16)
+    print("angle:",s16-t16)
 
     #kirim servo engkel pitch
-    dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
+    # dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
     dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
-    # dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
-    # dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
+    dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
+    dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
     robot.syncWrite()
     wait(0.5)
 
@@ -324,12 +330,23 @@ while(1):
 
 #masukin semua data ke excel
 df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
-df.to_excel('./src/program/data kemiringan robot pitch double support (invers).xlsx', index=False)
+df.to_excel('./src/program/data kemiringan robot pitch single support dengan hip (invers).xlsx', index=False)
 print("sudah diinput ke excel")
 #=========================================================================================
 
 
-# #==========================ambil data uji kemiringan robot (roll)=========================
+#==========================ambil data uji kemiringan robot (roll)=========================
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,17,1)
+
+# robot.syncWrite()
+# wait(1.5)
+
+# t17=robot.readOne(17)
+# t18=robot.readOne(18)
+# t9=robot.readOne(9)
+# t10=robot.readOne(10)
+
 # angleData=[]
 # comX=[]
 # comY=[]
@@ -337,7 +354,7 @@ print("sudah diinput ke excel")
 # imuRoll=[]
 # imuPitch=[]
 
-# angle=0
+# angle=-15
 # #------uji roll semakin positif
 # while(1):
 #     print("uji roll semakin positif-----Press any key to continue! (or press ESC to quit!)")
@@ -348,8 +365,10 @@ print("sudah diinput ke excel")
 #     print("angle:",angle)
 
 #     #kirim servo engkel roll
-#     dxl[16].moveSync(angle,0.5,dxl[16].prevGoal,read=0) #servo 17
-#     dxl[17].moveSync(angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
+#     dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
+#     # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip
 #     robot.syncWrite()
 #     wait(0.5)
 
@@ -366,12 +385,17 @@ print("sudah diinput ke excel")
     
 #     angle=angle+1 #ditambah 1 drajat nih (semakin positif)
     
-
-# angle=0
-# dxl[16].moveSync(angle,1,dxl[16].prevGoal,read=0) #servo 17
-# dxl[17].moveSync(angle,1,dxl[17].prevGoal,read=0) #servo 18
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,18,1)
 # robot.syncWrite()
-# wait(1)
+# wait(1.5)
+
+# t17=robot.readOne(17)
+# t18=robot.readOne(18)
+# t9=robot.readOne(9)
+# t10=robot.readOne(10)
+
+# angle=-15
 
 # while(1):
 #     print("uji roll semakin negatif-----Press any key to continue! (or press ESC to quit!)")
@@ -382,8 +406,10 @@ print("sudah diinput ke excel")
 #     print("angle:",angle)
 
 #     #kirim servo engkel roll
-#     dxl[16].moveSync(angle,0.5,dxl[16].prevGoal,read=0) #servo 17
-#     dxl[17].moveSync(angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
+#     dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
+#     # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip
 #     robot.syncWrite()
 #     wait(0.5)
 
@@ -402,5 +428,6 @@ print("sudah diinput ke excel")
 
 # #masukin semua data ke excel
 # df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
-# df.to_excel('./src/program/data kemiringan robot (roll).xlsx', index=False)
+# df.to_excel('./src/program/data kemiringan robot (roll) -14 dengan hip (invers) single support.xlsx', index=False)
+# print("sudah diinput ke excel")
 # #=========================================================================================
