@@ -1,0 +1,3 @@
+std_msgs/String what_data
+---
+std_msgs/String magneto_data

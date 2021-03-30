@@ -1,0 +1,15 @@
+<launch>
+    <node pkg="program" type="invers_kinematics.py" name="compute_invers_kinematics_server" output="screen"/>
+    <node pkg="program" type="invers_walk_kinematics.py" name="compute_invers_walk_server" output="screen"/>
+    <node pkg="program" type="forward_kinematics.py" name="compute_forward_kinematics_server" output="screen"/>
+    <node pkg="program" type="COM.py" name="compute_COM_server" output="screen"/>
+    <node pkg="program" type="imu_mpu6050.py" name="imu_mpu6050" output="screen"/>
+    <node pkg="program" type="imu_hmc5883l.py" name="imu_hmc5883l" output="screen"/>
+    <node pkg="program" type="get_magneto.py" name="magneto_server" output="screen"/>
+    <node pkg="program" type="get_mpu.py" name="mpu_server" output="screen"/>
+
+    <!-- <node pkg="dynamixel_sdk_examples" type="read_write_node" name="read_write_node_server" output="screen"/> -->
+
+ 
+
+</launch>

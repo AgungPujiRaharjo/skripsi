@@ -1,0 +1,7 @@
+std_msgs/String     base
+std_msgs/String     angle
+std_msgs/Int8       nFrame 
+---
+std_msgs/Float32    resultX
+std_msgs/Float32    resultY
+std_msgs/Float32    resultZ

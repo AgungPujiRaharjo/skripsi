@@ -1,0 +1,7 @@
+std_msgs/String     base
+std_msgs/Float32    coordinatX
+std_msgs/Float32    coordinatY
+std_msgs/Float32    coordinatZ
+---
+std_msgs/String     angleServo
+std_msgs/Float32    lengthLA

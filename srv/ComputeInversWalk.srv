@@ -1,0 +1,9 @@
+std_msgs/String     base
+std_msgs/Float32    coordinatX
+std_msgs/Float32    coordinatY
+std_msgs/Float32    coordinatZ
+std_msgs/Float32    length_la
+std_msgs/Float32    t_EngkleBasePitch
+std_msgs/Float32    t_EngkleBaseRoll
+---
+std_msgs/String     angleServo
