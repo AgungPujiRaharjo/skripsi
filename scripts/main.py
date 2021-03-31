@@ -289,6 +289,9 @@ while(1):
 angle=0
 invers(robot,dxl,'ki',0,0,20,1)
 invers(robot,dxl,'ka',0,0,18,1)
+dxl[17].moveSync(-15,1)
+dxl[8].moveSync(-14,1)
+dxl[16].moveSync(-15,1)
 robot.syncWrite()
 wait(1.5)
 
@@ -335,7 +338,8 @@ print("sudah diinput ke excel")
 #=========================================================================================
 
 
-#==========================ambil data uji kemiringan robot (roll)=========================
+# ==========================ambil data uji kemiringan robot (roll)=========================
+
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,17,1)
 
