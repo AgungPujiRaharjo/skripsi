@@ -379,6 +379,24 @@ def COM(robot,dxl,base,readAll_leg='yes',read_type='native',nFwd=26):
     return round(resp.comX.data,3),round(resp.comY.data,3),round(resp.comZ.data,3)
 
 #-----------------------------------------------------------------------------------------
+def walkPattern(robot,dxl,t,tsup,base):
+    if(LR_base == '1'):
+            vX_timeNow = (comAwal[1][0]*sinh(timeNow/walkInit_var[0])/walkInit_var[0]) + (walkInit_var[2]*cosh(timeNow/walkInit_var[0]))
+            vY_timeNow = (comAwal[1][1]*sinh(timeNow/walkInit_var[0])/walkInit_var[0]) - (walkInit_var[4]*cosh(timeNow/walkInit_var[0]))
+
+            # posisi tujuan pattern saat timeNow
+            x_timeNow = (comAwal[1][0]*cosh(timeNow/walkInit_var[0])) + (walkInit_var[0]*walkInit_var[2]*sinh(timeNow/walkInit_var[0]))
+            y_timeNow = (comAwal[1][1]*cosh(timeNow/walkInit_var[0])) + (walkInit_var[0]*(walkInit_var[4])*sinh(timeNow/walkInit_var[0]))
+        
+        elif(LR_base == '0'):
+            vX_timeNow = (comAwal[0][0]*sinh(timeNow/walkInit_var[1])/walkInit_var[1]) + (walkInit_var[3]*cosh(timeNow/walkInit_var[1]))
+            vY_timeNow = (comAwal[0][1]*sinh(timeNow/walkInit_var[1])/walkInit_var[1]) - (walkInit_var[5]*cosh(timeNow/walkInit_var[1]))
+
+            # posisi tujuan pattern saat timeNow
+            x_timeNow = (comAwal[0][0]*cosh(timeNow/walkInit_var[1])) + (walkInit_var[1]*walkInit_var[3]*sinh(timeNow/walkInit_var[1]))
+            y_timeNow = (comAwal[0][1]*cosh(timeNow/walkInit_var[1])) + (walkInit_var[1]*(walkInit_var[5])*sinh(timeNow/walkInit_var[1]))
+        return(x_timeNow, y_timeNow)
+
 def walkUpdate(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
     
