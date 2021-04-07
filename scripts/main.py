@@ -110,11 +110,11 @@ else:
 # Enable Dynamixel#1 Torque
 robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 
-# #program untuk duduk 
-# # aDuduk=[291,734,267,740,453,568,355,654,524,516,183,861,477,590,507,485,516,516]
-# # for i in range(len(aDuduk)):
-# #     dxl[i].moveSync(aDuduk[i],2,type='reg')
-# # robot.syncWrite()
+# # program untuk duduk 
+# aDuduk=[291,734,267,740,453,568,355,654,524,516,183,861,477,590,507,485,516,516]
+# for i in range(len(aDuduk)):
+#     dxl[i].moveSync(aDuduk[i],2,type='reg')
+# robot.syncWrite()
 
 # ##----------------------------------------gerakin default-------------------------------
 while 1:
@@ -140,8 +140,8 @@ while 1:
 ####--------------------------------------------------------------------------------------
 
 ##=============================coba pola dinamis==============
-invers(robot,dxl,'ki',0,-3,20,1)
-invers(robot,dxl,'ka',0,-3,18,1)
+invers(robot,dxl,'ki',0,0,20,1)
+invers(robot,dxl,'ka',0,0,20,1)
 robot.syncWrite()
 wait(1.5)
 
@@ -149,13 +149,17 @@ resCOM=COM(robot,dxl,'ki')
 comDef["x"],comDef["y"],comDef["z"]=resCOM[0],resCOM[1],resCOM[2]
 print("comDef",comDef)
 wait(0.1)
-
+#-------pake punya mba habib---
+# Xtc=1
+# Ytc=4.8
+# Zt=comDef["z"]
+#---------------------
 firstStep=1
-xGoal=[4,4]
+xGoal=[4]
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
-tsup=2 #waktu total satu langkah
+tsup2 #waktu total satu langkah
 lastStep=0
 firstMicros=micros()
 

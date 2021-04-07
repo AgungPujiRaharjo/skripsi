@@ -379,35 +379,22 @@ def COM(robot,dxl,base,readAll_leg='yes',read_type='native',nFwd=26):
     return round(resp.comX.data,3),round(resp.comY.data,3),round(resp.comZ.data,3)
 
 #-----------------------------------------------------------------------------------------
-def walkPattern(robot,dxl,t,tsup,base):
-    if(LR_base == '1'):
-            vX_timeNow = (comAwal[1][0]*sinh(timeNow/walkInit_var[0])/walkInit_var[0]) + (walkInit_var[2]*cosh(timeNow/walkInit_var[0]))
-            vY_timeNow = (comAwal[1][1]*sinh(timeNow/walkInit_var[0])/walkInit_var[0]) - (walkInit_var[4]*cosh(timeNow/walkInit_var[0]))
-
-            # posisi tujuan pattern saat timeNow
-            x_timeNow = (comAwal[1][0]*cosh(timeNow/walkInit_var[0])) + (walkInit_var[0]*walkInit_var[2]*sinh(timeNow/walkInit_var[0]))
-            y_timeNow = (comAwal[1][1]*cosh(timeNow/walkInit_var[0])) + (walkInit_var[0]*(walkInit_var[4])*sinh(timeNow/walkInit_var[0]))
-        
-        elif(LR_base == '0'):
-            vX_timeNow = (comAwal[0][0]*sinh(timeNow/walkInit_var[1])/walkInit_var[1]) + (walkInit_var[3]*cosh(timeNow/walkInit_var[1]))
-            vY_timeNow = (comAwal[0][1]*sinh(timeNow/walkInit_var[1])/walkInit_var[1]) - (walkInit_var[5]*cosh(timeNow/walkInit_var[1]))
-
-            # posisi tujuan pattern saat timeNow
-            x_timeNow = (comAwal[0][0]*cosh(timeNow/walkInit_var[1])) + (walkInit_var[1]*walkInit_var[3]*sinh(timeNow/walkInit_var[1]))
-            y_timeNow = (comAwal[0][1]*cosh(timeNow/walkInit_var[1])) + (walkInit_var[1]*(walkInit_var[5])*sinh(timeNow/walkInit_var[1]))
-        return(x_timeNow, y_timeNow)
 
 def walkUpdate(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
     
     if base==-1: #base kaki kiri
         yg=-1 #pengali untuk merubah kaki tumpuan
+        Xtc=1
+        Ytc=4.8
         if condition=='normal':
             COM(robot,dxl,'ki',readAll_leg='base')
         elif condition=='virtual':
             COM(robot,dxl,'ki',readAll_leg='virtual')
     elif base==1: #base kaki kanan
         yg=1
+        Ytc=4.5
+        Xtc=1
         if condition=='normal':
             COM(robot,dxl,'ka',readAll_leg='base')
         elif condition=='virtual':
@@ -418,157 +405,166 @@ def walkUpdate(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'
     #periode 1
     if t<=(tsup/4)+0.1:
         if firstStep==1: #jika awal melangkah
-            t1=0
-            t2=tsup/4+0.1
-            y1=-yg*comDef["y"]
-            y2=yg*0
-            Xt=comDef["x"]
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-            sfx=0
-            sfy=0
-            sfz=0
-            
-            pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
-        
-        elif firstStep==0: #jika bukan awal melangkah
-          
-            t1=0
-            t2=tsup/4+0.1
-            # x1=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
-            x1=comNow["x"]
-            x2=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
-            # x2=comDef["x"]
-            y1=comYPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
-            y2=yg*0
-
+            #---------------------
+            Xt=comDef["x"]-(t*comDef["x"]/((tsup/4)+0.1)
+            Yt=((t*yg*Ytc)/((tsup/4)+0.1))
             sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
-            print("fwdXNow:",fwdNow["x"])
+            #---------------------
+            # t1=0
+            # t2=tsup/4+0.1
+            # y1=-yg*comDef["y"]
+            # y2=yg*0
+            # Xt=comDef["x"]
+            # Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            # sfx=0
             sfy=0
-            sfz=sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-            if sfz<0:
-                sfz=0
-
-            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-           
-            pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
-         
-        comXPolaPeriod[1]=Xt
-        comYPolaPeriod[1]=Yt
-        print("==================Periode 1=====================")
-        
-    #periode 2
-    elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
-        
-        t1=(tsup/4)+0.1
-        t2=(tsup/2)+0.1
-        y1=comYPolaPeriod[1]
-        y2=yg*0
-        Xt=comDef["x"]
-        # if firstStep==1:
-        #     Xt=comDef["x"]
-        # elif firstStep==0:
-        #     x1=comXPolaPeriod[1]
-        #     x2=(xGoal*10/2)+comDef["x"]
-        #     Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-
-        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-        comXPolaPeriod[2]=Xt
-        comYPolaPeriod[2]=Yt
-
-        sfy=0
-        sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
-        sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-
-        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
-
-        print("==================Periode 2=====================")
-    
-    #periode 3
-    elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
-        t1=(tsup/2)+0.1
-        t2=(3*tsup/4)+0.15
-        x1=comXPolaPeriod[2]
-        x2=(xGoal*10/2)+comDef["x"]
-        y1=comYPolaPeriod[2]
-        y2=yg*15 #yg*0
-        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-
-        sfy=0
-        sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
-        sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-        if sfz<0:
             sfz=0
-
-        if sfx>xGoal:
-            sfx=xGoal
-
-        comXPolaPeriod[3]=Xt
-        comYPolaPeriod[3]=Yt
-        
-        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
-        print("==================Periode 3=====================")
-
-    # #periode 4
-    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.25):
-        
-        #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
-        if lastStep==0:
+            Zt=comDef["z"]+(t*(17-comDef["z"])/(tsup/4)+0.1)
             
-            t1=(3*tsup/4)+0.15
-            t2=(tsup)+0.25
-            x1=comXPolaPeriod[3]
-            x2=(xGoal*10/2)+comDef["x"]
-            y1=comYPolaPeriod[3]
-            y2=-yg*comDef["y"]
-            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-            sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
-            sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-            if sfz<0:
-                sfz=0
-
-            if sfx>xGoal:
-                sfx=xGoal
-            
-            sfy=0
-
-        #jika akhir langkah dan akan berhenti (kaki sejajar)
-        elif lastStep==1:
-            
-            t1=(3*tsup/4)+0.15
-            t2=(tsup)+0.25
-            x1=comXPolaPeriod[3]
-            x2=comDef["x"]
-            y1=comYPolaPeriod[3]
-            y2=-yg*comDef["y"]
-            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-            sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
-            sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-            if sfz<0:
-                sfz=0
-
-            if sfx>xGoal:
-                sfx=xGoal
-            sfy=0
+            pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
         
-        comXPolaPeriod[4]=Xt
-        comYPolaPeriod[4]=Yt
-        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
-        print("==================Periode 4=====================")
+    #     elif firstStep==0: #jika bukan awal melangkah
 
-    print("base kaki kiri" if base==-1 else "base kaki kanan" )
-    print("Xt=",Xt)
-    print("Yt=",Yt)
-    print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
-    print("sfx=",sfx)
-    print("sfy=",sfy)
-    print("sfz=",sfz)
-    print("================================================")
+    #         t1=0
+    #         t2=tsup/4+0.1
+    #         # x1=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
+    #         x1=comNow["x"]
+    #         x2=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
+    #         # x2=comDef["x"]
+    #         y1=comYPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
+    #         y2=yg*0
 
-    # return Xt,Yt,sfx,sfy,sfz
+    #         sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
+    #         print("fwdXNow:",fwdNow["x"])
+    #         sfy=0
+    #         sfz=sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+    #         if sfz<0:
+    #             sfz=0
+
+    #         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+    #         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+           
+    #         pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
+         
+    #     comXPolaPeriod[1]=Xt
+    #     comYPolaPeriod[1]=Yt
+    #     print("==================Periode 1=====================")
+        
+    # #periode 2
+    # elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
+        
+    #     t1=(tsup/4)+0.1
+    #     t2=(tsup/2)+0.1
+    #     y1=comYPolaPeriod[1]
+    #     y2=yg*0  #yg*0
+    #     # x1=comXPolaPeriod[1]
+    #     # x2=(xGoal*10/2)+comDef["x"]
+    #     # Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+    #     Xt=comDef["x"]
+    #     # if firstStep==1:
+    #     #     Xt=comDef["x"]
+    #     # elif firstStep==0:
+    #     #     x1=comXPolaPeriod[1]
+    #     #     x2=(xGoal*10/2)+comDef["x"]
+    #     #     Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+
+    #     Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+    #     comXPolaPeriod[2]=Xt
+    #     comYPolaPeriod[2]=Yt
+
+    #     sfy=0
+    #     sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
+    #     sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+
+    #     pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+
+    #     print("==================Periode 2=====================")
+    
+    # #periode 3
+    # elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
+    #     t1=(tsup/2)+0.1
+    #     t2=(3*tsup/4)+0.15
+    #     x1=comXPolaPeriod[2]      
+    #     x2=(xGoal*10/2)+comDef["x"]
+    #     y1=comYPolaPeriod[2]
+    #     y2=yg*0 #yg*0 15
+    #     Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+    #     Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+    #     sfy=0
+    #     sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
+    #     sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+    #     if sfz<0:
+    #         sfz=0
+
+    #     if sfx>xGoal:
+    #         sfx=xGoal
+
+    #     comXPolaPeriod[3]=Xt
+    #     comYPolaPeriod[3]=Yt
+        
+    #     pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+    #     print("==================Periode 3=====================")
+
+    # # #periode 4
+    # elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.25):
+        
+    #     #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
+    #     if lastStep==0:
+            
+    #         t1=(3*tsup/4)+0.15
+    #         t2=(tsup)+0.25
+    #         x1=comXPolaPeriod[3]
+    #         x2=(xGoal*10/2)+comDef["x"]
+    #         y1=comYPolaPeriod[3]
+    #         y2=-yg*comDef["y"]
+    #         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+    #         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+    #         sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
+    #         sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+    #         if sfz<0:
+    #             sfz=0
+
+    #         if sfx>xGoal:
+    #             sfx=xGoal
+            
+    #         sfy=0
+
+    #     # jika akhir langkah dan akan berhenti (kaki sejajar)
+    #     elif lastStep==1:
+            
+    #         t1=(3*tsup/4)+0.15
+    #         t2=(tsup)+0.25
+    #         x1=comXPolaPeriod[3]
+    #         x2=comDef["x"]
+    #         y1=comYPolaPeriod[3]
+    #         y2=-yg*comDef["y"]
+    #         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+    #         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+    #         sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
+    #         sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+    #         if sfz<0:
+    #             sfz=0
+
+    #         if sfx>xGoal:
+    #             sfx=xGoal
+    #         sfy=0
+        
+    #     comXPolaPeriod[4]=Xt
+    #     comYPolaPeriod[4]=Yt
+    #     pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
+    #     print("==================Periode 4=====================")
+
+    # print("base kaki kiri" if base==-1 else "base kaki kanan" )
+    # print("Xt=",Xt)
+    # print("Yt=",Yt)
+    # print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
+    # print("sfx=",sfx)
+    # print("sfy=",sfy)
+    # print("sfz=",sfz)
+    # print("================================================")
+
+    # # return Xt,Yt,sfx,sfy,sfz
 
 def Control(robot,dxl,base,t,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
