@@ -6,6 +6,7 @@
     <!-- <node pkg="program" type="imu_mpu6050.py" name="imu_mpu6050" output="screen"/>
     <node pkg="program" type="imu_hmc5883l.py" name="imu_hmc5883l" output="screen"/>
     <node pkg="program" type="get_magneto.py" name="magneto_server" output="screen"/>
+    <node pkg="program" type="get_ultrasonic.py" name="ultrasonic_server" output="screen"/>
     <node pkg="program" type="get_mpu.py" name="mpu_server" output="screen"/> -->
 
     <!-- <node pkg="dynamixel_sdk_examples" type="read_write_node" name="read_write_node_server" output="screen"/> -->

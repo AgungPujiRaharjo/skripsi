@@ -582,12 +582,22 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     #periode 1
     if t<=(tsup/4)+0.1:
         if firstStep==1: #jika awal melangkah
-            Xt=comDef["x"]-(t*comDef["x"]/((tsup/4)+0.1))
-            Yt=((t*yg*Ytc)/((tsup/4)+0.1))
-            sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
+            t1=0
+            t2=tsup/4+0.1
+            y1=-yg*comDef["y"]
+            y2=yg*0
+            Xt=comDef["x"]
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            sfx=0
             sfy=0
             sfz=0
-            Zt=comDef["z"]+(t*(17-comDef["z"])/(tsup/4)+0.1)
+            
+            # Xt=comDef["x"]-(t*comDef["x"]/((tsup/4)+0.1))
+            # Yt=((t*yg*Ytc)/((tsup/4)+0.1))
+            # sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
+            # sfy=0
+            # sfz=0
+            # Zt=comDef["z"]+(t*(17-comDef["z"])/(tsup/4)+0.1)
             
             pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
         
@@ -634,7 +644,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     #periode 3
     elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
         Xt=((t-(tsup/2))*1/(tsup/4))
-        Yt=(yg*Ytc)-((t-(tsup/2))*(1*yg)/(tsup/4))
+        Yt=(yg*Ytc)-((t-(tsup/2))*(1*yg)/(tsup/4))-3
 
         sfy=0
         sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
@@ -651,19 +661,35 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
         print("==================Periode 3=====================")
 
-    # #periode 4
+    #periode 4
     elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.25):
-        Xt=((t-(3*tsup/4))*xGoal/(tsup/4))
-        Yt=(4*yg)-((t-(3*tsup/4))*(4*yg)/(tsup/4))
+        t1=(3*tsup/4)+0.15
+        t2=(tsup)+0.25
+        x1=comXPolaPeriod[3]
+        x2=(xGoal*10/2)+comDef["x"]
+        y1=comYPolaPeriod[3]
+        y2=-yg*comDef["y"]
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
         sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
         sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
         if sfz<0:
             sfz=0
-
         if sfx>xGoal:
             sfx=xGoal
-            
         sfy=0
+
+        # Xt=((t-(3*tsup/4))*xGoal/(tsup/4))
+        # Yt=(4*yg)-((t-(3*tsup/4))*(4*yg)/(tsup/4))
+        # sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
+        # sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+        # if sfz<0:
+        #     sfz=0
+
+        # if sfx>xGoal:
+        #     sfx=xGoal
+            
+        # sfy=0
 
     comXPolaPeriod[4]=Xt
     comYPolaPeriod[4]=Yt

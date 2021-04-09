@@ -89,26 +89,26 @@ dxl.append(servo.Servo(516,18,portHandler,packetHandler))
 groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, ADDR_AX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 
-# # Open port
-# if robot.portHandler.openPort():
-#     print("Succeeded to open the port")
-# else:
-#     print("Failed to open the port")
-#     print("Press any key to terminate...")
-#     getch()
-#     quit()
+# Open port
+if robot.portHandler.openPort():
+    print("Succeeded to open the port")
+else:
+    print("Failed to open the port")
+    print("Press any key to terminate...")
+    getch()
+    quit()
 
-# # Set port baudrate
-# if robot.portHandler.setBaudRate(BAUDRATE):
-#     print("Succeeded to change the baudrate")
-# else:
-#     print("Failed to change the baudrate")
-#     print("Press any key to terminate...")
-#     getch()
-#     quit()
+# Set port baudrate
+if robot.portHandler.setBaudRate(BAUDRATE):
+    print("Succeeded to change the baudrate")
+else:
+    print("Failed to change the baudrate")
+    print("Press any key to terminate...")
+    getch()
+    quit()
     
-# # Enable Dynamixel#1 Torque
-# robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
+# Enable Dynamixel#1 Torque
+robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 
 # # program untuk duduk 
 # aDuduk=[291,734,267,740,453,568,355,654,524,516,183,861,477,590,507,485,516,516]
@@ -116,119 +116,65 @@ robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 #     dxl[i].moveSync(aDuduk[i],2,type='reg')
 # robot.syncWrite()
 
-# ##----------------------------------------gerakin default-------------------------------
-# while 1:
-#     print("=========default====================")
-#     print("Press any key to continue! (or press ESC to quit!)")
-#     if getch() == chr(0x1b):
-#         break
+##----------------------------------------gerakin default-------------------------------
+while 1:
+    print("=========default====================")
+    print("Press any key to continue! (or press ESC to quit!)")
+    if getch() == chr(0x1b):
+        break
         
-#     for obj in dxl :
-#         obj.moveSync(obj.default, 1.5,0,'reg')
-#     start = time.time()
+    for obj in dxl :
+        obj.moveSync(obj.default, 1.5,0,'reg')
+    start = time.time()
     
-#     robot.syncWrite()
-#     indexMoving = 3
-#     while indexMoving > 2 :
-#         isMoving = robot.readAll(ADDR_AX_MOVING,1)
-#         print('isMoving: ', isMoving)
-#         indexMoving = 0
-#         for i in isMoving:
-#             indexMoving = indexMoving + i
-#     end = time.time()
-#     print("waktu: ", end - start)
-# ####--------------------------------------------------------------------------------------
+    robot.syncWrite()
+    indexMoving = 3
+    while indexMoving > 2 :
+        isMoving = robot.readAll(ADDR_AX_MOVING,1)
+        print('isMoving: ', isMoving)
+        indexMoving = 0
+        for i in isMoving:
+            indexMoving = indexMoving + i
+    end = time.time()
+    print("waktu: ", end - start)
+####--------------------------------------------------------------------------------------
 
-# ##=============================coba pola dinamis==============
-# invers(robot,dxl,'ki',0,0,20,1)
-# invers(robot,dxl,'ka',0,0,20,1)
-# robot.syncWrite()
-# wait(1.5)
-
-# resCOM=COM(robot,dxl,'ki')
-# comDef["x"],comDef["y"],comDef["z"]=resCOM[0],resCOM[1],resCOM[2]
-# print("comDef",comDef)
-# wait(0.1)
-# #-------pake punya mba habib---
-# # Xtc=1
-# # Ytc=4.8
-# # Zt=comDef["z"]
-# #---------------------
-# firstStep=1
-# xGoal=[4]
-# n=0
-# base=-1 # -1 base kaki kiri, 1 base kaki kanan
-# tsmp=0.1 #waktu sampling
-# tsup2 #waktu total satu langkah
-# lastStep=0
-# firstMicros=micros()
-
-# while(1):
-#     t1=time.time()
-#     wait(0.021) 
-    
-#     currentMicros=micros()
-#     t=currentMicros-firstMicros
-
-#     walkUpdate(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
-#     Control(robot,dxl,base,t)
-#     t2=time.time()
-#     print("t satu kali:",t2-t1)
-#     # jika satu langkah telah berakhir
-#     if t/1000000>=tsup: #+0.3: 
-#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
-#         base=base*(-1) # switch kaki tumpu
-        
-#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
-#         firstStep=0 # bukan awal langkah lagi      
-#         n+=1
-#         if n==(len(xGoal))-1:
-#             # lastStep=1 
-#             print("waw") 
-
-#         if n>(len(xGoal))-1:
-#             break
-
-# -------------------------------default virtual---------------------------------
-for obj in dxl :
-    obj.moveSync(obj.default, 2,0,type='reg',read=0)
-# ##-------------------------------------------------------------------------------
-
-# # # # ##=============================coba pola dinamis virtual==============
+##=============================coba pola dinamis==============
 invers(robot,dxl,'ki',0,0,20,1)
 invers(robot,dxl,'ka',0,0,20,1)
+robot.syncWrite()
 wait(1.5)
 
-resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+resCOM=COM(robot,dxl,'ki')
 comDef["x"],comDef["y"],comDef["z"]=resCOM[0],resCOM[1],resCOM[2]
 print("comDef",comDef)
 wait(0.1)
 
-# Ytc=4.5
-# Xtc=1
 firstStep=1
-lastStep=0
-firstMicros=micros()
 xGoal=[4]
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
 tsup=2 #waktu total satu langkah
+lastStep=0
+firstMicros=micros()
 
 while(1):
-    wait(0.1)
-        
+    t1=time.time()
+    wait(0.021) 
+    
     currentMicros=micros()
     t=currentMicros-firstMicros
 
-    walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='virtual')
-    Control(robot,dxl,base,t,condition='virtual')
-
+    walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
+    Control(robot,dxl,base,t)
+    t2=time.time()
+    print("t satu kali:",t2-t1)
     # jika satu langkah telah berakhir
     if t/1000000>=tsup: #+0.3: 
         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
         base=base*(-1) # switch kaki tumpu
-
+        
         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
         firstStep=0 # bukan awal langkah lagi      
         n+=1
@@ -238,6 +184,56 @@ while(1):
 
         if n>(len(xGoal))-1:
             break
+
+# # -------------------------------default virtual---------------------------------
+# for obj in dxl :
+#     obj.moveSync(obj.default, 2,0,type='reg',read=0)
+# # ##-------------------------------------------------------------------------------
+
+# # # # # ##=============================coba pola dinamis virtual==============
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# wait(1.5)
+
+# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+# comDef["x"],comDef["y"],comDef["z"]=resCOM[0],resCOM[1],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
+
+# # Ytc=4.5
+# # Xtc=1
+# firstStep=1
+# lastStep=0
+# firstMicros=micros()
+# xGoal=[4]
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+
+# while(1):
+#     wait(0.1)
+        
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+
+#     walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='virtual')
+#     Control(robot,dxl,base,t,condition='virtual')
+
+#     # jika satu langkah telah berakhir
+#     if t/1000000>=tsup: #+0.3: 
+#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+#         base=base*(-1) # switch kaki tumpu
+
+#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+#         firstStep=0 # bukan awal langkah lagi      
+#         n+=1
+#         if n==(len(xGoal))-1:
+#             # lastStep=1 
+#             print("waw") 
+
+#         if n>(len(xGoal))-1:
+#             break
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
 # invers(robot,dxl,'ki',0,0,20,1)
