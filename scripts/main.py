@@ -150,40 +150,40 @@ comDef["x"],comDef["y"],comDef["z"]=resCOM[0],resCOM[1],resCOM[2]
 print("comDef",comDef)
 wait(0.1)
 
-firstStep=1
-xGoal=[4]
-n=0
-base=-1 # -1 base kaki kiri, 1 base kaki kanan
-tsmp=0.1 #waktu sampling
-tsup=2 #waktu total satu langkah
-lastStep=0
-firstMicros=micros()
+# firstStep=1
+# xGoal=[4]
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+# lastStep=0
+# firstMicros=micros()
 
-while(1):
-    t1=time.time()
-    wait(0.021) 
+# while(1):
+#     t1=time.time()
+#     wait(0.021) 
     
-    currentMicros=micros()
-    t=currentMicros-firstMicros
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
 
-    walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
-    Control(robot,dxl,base,t)
-    t2=time.time()
-    print("t satu kali:",t2-t1)
-    # jika satu langkah telah berakhir
-    if t/1000000>=tsup: #+0.3: 
-        print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
-        base=base*(-1) # switch kaki tumpu
+#     walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
+#     Control(robot,dxl,base,t)
+#     t2=time.time()
+#     print("t satu kali:",t2-t1)
+#     # jika satu langkah telah berakhir
+#     if t/1000000>=tsup: #+0.3: 
+#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+#         base=base*(-1) # switch kaki tumpu
         
-        firstMicros=micros() #perbaharui waktu dari awal (0 detik)
-        firstStep=0 # bukan awal langkah lagi      
-        n+=1
-        if n==(len(xGoal))-1:
-            # lastStep=1 
-            print("waw") 
+#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+#         firstStep=0 # bukan awal langkah lagi      
+#         n+=1
+#         if n==(len(xGoal))-1:
+#             # lastStep=1 
+#             print("waw") 
 
-        if n>(len(xGoal))-1:
-            break
+#         if n>(len(xGoal))-1:
+#             break
 
 # # -------------------------------default virtual---------------------------------
 # for obj in dxl :
