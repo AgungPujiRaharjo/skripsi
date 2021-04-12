@@ -331,11 +331,11 @@ while(1):
     imuRoll.append(roll)
     imuPitch.append(pitch)
     
-    angle=angle-1 #dikurang 1 drajat nih (semakin negatif)
+    angle=angle-1 #dikurang 1 derajat(semakin negatif)
 
 #masukin semua data ke excel
 df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
-df.to_excel('./src/program/data/data kemiringan robot pitch double support dengan hip (invers).xlsx', index=False)
+df.to_excel('./src/program/data pitch kemiringan robot double support dengan hip (invers).xlsx', index=False)
 print("sudah diinput ke excel")
 #=========================================================================================
 
