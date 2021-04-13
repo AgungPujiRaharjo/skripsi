@@ -89,26 +89,26 @@ dxl.append(servo.Servo(516,18,portHandler,packetHandler))
 groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, ADDR_AX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 
-# Open port
-if robot.portHandler.openPort():
-    print("Succeeded to open the port")
-else:
-    print("Failed to open the port")
-    print("Press any key to terminate...")
-    getch()
-    quit()
+# # Open port
+# if robot.portHandler.openPort():
+#     print("Succeeded to open the port")
+# else:
+#     print("Failed to open the port")
+#     print("Press any key to terminate...")
+#     getch()
+#     quit()
 
 # Set port baudrate
-if robot.portHandler.setBaudRate(BAUDRATE):
-    print("Succeeded to change the baudrate")
-else:
-    print("Failed to change the baudrate")
-    print("Press any key to terminate...")
-    getch()
-    quit()
+# if robot.portHandler.setBaudRate(BAUDRATE):
+#     print("Succeeded to change the baudrate")
+# else:
+#     print("Failed to change the baudrate")
+#     print("Press any key to terminate...")
+#     getch()
+#     quit()
     
 # Enable Dynamixel#1 Torque
-robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
+# robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 
 # # program untuk duduk 
 # aDuduk=[291,734,267,740,453,568,355,654,524,516,183,861,477,590,507,485,516,516]
@@ -117,26 +117,26 @@ robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 # robot.syncWrite()
 
 ##----------------------------------------gerakin default-------------------------------
-while 1:
-    print("=========default====================")
-    print("Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
+# while 1:
+#     print("=========default====================")
+#     print("Press any key to continue! (or press ESC to quit!)")
+#     if getch() == chr(0x1b):
+#         break
         
-    for obj in dxl :
-        obj.moveSync(obj.default, 1.5,0,'reg')
-    start = time.time()
+#     for obj in dxl :
+#         obj.moveSync(obj.default, 1.5,0,'reg')
+#     start = time.time()
     
-    robot.syncWrite()
-    indexMoving = 3
-    while indexMoving > 2 :
-        isMoving = robot.readAll(ADDR_AX_MOVING,1)
-        print('isMoving: ', isMoving)
-        indexMoving = 0
-        for i in isMoving:
-            indexMoving = indexMoving + i
-    end = time.time()
-    print("waktu: ", end - start)
+#     robot.syncWrite()
+#     indexMoving = 3
+#     while indexMoving > 2 :
+#         isMoving = robot.readAll(ADDR_AX_MOVING,1)
+#         print('isMoving: ', isMoving)
+#         indexMoving = 0
+#         for i in isMoving:
+#             indexMoving = indexMoving + i
+#     end = time.time()
+#     print("waktu: ", end - start)
 ####--------------------------------------------------------------------------------------
 
 ##=============================coba pola dengan LQR==============
@@ -319,10 +319,10 @@ while 1:
 # wb.save(loc)
 # # ##===============================================================
 
-# # -------------------------------default virtual---------------------------------
-# for obj in dxl :
-#     obj.moveSync(obj.default, 2,0,type='reg',read=0)
-# # ##-------------------------------------------------------------------------------
+# -------------------------------default virtual---------------------------------
+for obj in dxl :
+    obj.moveSync(obj.default, 2,0,type='reg',read=0)
+# ##-------------------------------------------------------------------------------
 
 # # # # # ##=============================coba pola dinamis virtual==============
 # invers(robot,dxl,'ki',0,0,20,1)
@@ -369,119 +369,119 @@ while 1:
 #         if n>(len(xGoal))-1:
 #             break
 
-# ##=============================coba pola dinamis virtual==============
-# invers(robot,dxl,'ki',0,0,20,1)
-# invers(robot,dxl,'ka',0,0,20,1)
-# wait(1.5)
+##=============================coba pola dinamis virtual==============
+invers(robot,dxl,'ki',0,0,20,1)
+invers(robot,dxl,'ka',0,0,20,1)
+wait(1.5)
 
-# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
-# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
-# print("comDef",comDef)
-# wait(0.1)
+resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+print("comDef",comDef)
+wait(0.1)
 
-# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
-# state1Pitch=arctan(comNow["x"]/comNow["z"])
-# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+state1Pitch=arctan(comNow["x"]/comNow["z"])
+controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
-# while(1):
-#     inp=input("========press 'enter' to walk, 'i' to init invers = ")
-#     if inp=="":
-#         break
+while(1):
+    inp=input("========press 'enter' to walk, 'i' to init invers = ")
+    if inp=="":
+        break
 
-#     elif inp=="i" or inp=="I":
-#         invers(robot,dxl,'ki',0,0,20,1)
-#         invers(robot,dxl,'ka',0,0,20,1)
-#         wait(1.5)
+    elif inp=="i" or inp=="I":
+        invers(robot,dxl,'ki',0,0,20,1)
+        invers(robot,dxl,'ka',0,0,20,1)
+        wait(1.5)
 
-#         resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
-#         comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
-#         print("comDef",comDef)
+        resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+        comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+        print("comDef",comDef)
 
-#         state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
-#         state1Pitch=arctan(comNow["x"]/comNow["z"])
-#         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+        state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+        state1Pitch=arctan(comNow["x"]/comNow["z"])
+        controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
 
-# firstStep=1
-# xGoal=[4]
-# n=0
-# base=-1 # -1 base kaki kiri, 1 base kaki kanan
-# tsmp=0.1 #waktu sampling
-# tsup=2 #waktu total satu langkah
-# lastStep=0
-# Q,K=tuningLQR('walk') #tuning LQR untuk mendapatkan nilai K
+firstStep=1
+xGoal=[4]
+n=0
+base=-1 # -1 base kaki kiri, 1 base kaki kanan
+tsmp=0.1 #waktu sampling
+tsup=2 #waktu total satu langkah
+lastStep=0
+Q,K=tuningLQR('walk') #tuning LQR untuk mendapatkan nilai K
 
-# allPttrnXt=[]
-# allPttrnYt=[]
-# allCOMx=[]
-# allCOMy=[]
-# allCOMz=[]
-# allTime=[]
-# QSave=["Q"]
-# KSave=["K"]
-# tp=0
-# fwdDef["x"]=fwdNow["x"]
+allPttrnXt=[]
+allPttrnYt=[]
+allCOMx=[]
+allCOMy=[]
+allCOMz=[]
+allTime=[]
+QSave=["Q"]
+KSave=["K"]
+tp=0
+fwdDef["x"]=fwdNow["x"]
 
-# allxBase=[]
-# allxSwing=[]
-# allxPattern=[]
-# alltBase=[]
-# allxFwd=[]
+allxBase=[]
+allxSwing=[]
+allxPattern=[]
+alltBase=[]
+allxFwd=[]
 
-# firstMicros=micros()
-# while(1):
+firstMicros=micros()
+while(1):
 
-#     t1=time.time()
-#     currentMicros=micros()
-#     t=currentMicros-firstMicros
+    t1=time.time()
+    currentMicros=micros()
+    t=currentMicros-firstMicros
 
-#     walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='virtual')
-#     Control3(robot,dxl,base,t,K,condition='virtual')
+    walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='virtual')
+    Control3(robot,dxl,base,t,K,condition='virtual')
 
-#     allPttrnXt.append(pttrn["Xt"])
-#     allPttrnYt.append(pttrn["Yt"])
-#     allCOMx.append(comNow["x"])
-#     allCOMy.append(comNow["y"])
-#     allCOMz.append(comNow["z"])
-#     allTime.append((t/1000)+tp)
+    allPttrnXt.append(pttrn["Xt"])
+    allPttrnYt.append(pttrn["Yt"])
+    allCOMx.append(comNow["x"])
+    allCOMy.append(comNow["y"])
+    allCOMz.append(comNow["z"])
+    allTime.append((t/1000)+tp)
 
-#     allxBase.append(swngPlan["xbase"])
-#     allxSwing.append(swngPlan["xswing"])
-#     allxPattern.append(swngPlan["sfx"])
-#     alltBase.append(swngPlan["tbase"])
-#     allxFwd.append(swngPlan["xFwd"])
-#     t2=time.time()
+    # allxBase.append(swngPlan["xbase"])
+    # allxSwing.append(swngPlan["xswing"])
+    # allxPattern.append(swngPlan["sfx"])
+    # alltBase.append(swngPlan["tbase"])
+    # allxFwd.append(swngPlan["xFwd"])
+    t2=time.time()
 
-#     wait(0.021)
+    wait(0.021)
 
-#     print("t aksi:",t2-t1)
-#     # jika satu langkah telah berakhir
-#     if t/1000000>=tsup: #+0.3: 
-#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
-#         base=base*(-1) # switch kaki tumpu
+    print("t aksi:",t2-t1)
+    # jika satu langkah telah berakhir
+    if t/1000000>=tsup: #+0.3: 
+        print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+        base=base*(-1) # switch kaki tumpu
 
-#         #forward dengan membaca semua servo
-#         if base==-1:
-#             res=forward(robot,dxl,'ki',readAll_leg='virtual')
-#             fwdDef["x"]=res[0]
-#             print("fwd last",res)
+        #forward dengan membaca semua servo
+        if base==-1:
+            res=forward(robot,dxl,'ki',readAll_leg='virtual')
+            fwdDef["x"]=res[0]
+            print("fwd last",res)
            
-#         elif base==1:
-#             res=forward(robot,dxl,'ka',readAll_leg='virtual')
-#             fwdDef["x"]=res[0]
-#             print("fwd last",res)
+        elif base==1:
+            res=forward(robot,dxl,'ka',readAll_leg='virtual')
+            fwdDef["x"]=res[0]
+            print("fwd last",res)
 
-#         wait(0.5)
-#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
-#         firstStep=0 # bukan awal langkah lagi      
-#         n+=1
-#         tp+=2000
-#         if n==(len(xGoal))-1:
-#             # lastStep=1 
-#             print("waw") 
+        wait(0.5)
+        firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+        firstStep=0 # bukan awal langkah lagi      
+        n+=1
+        tp+=2000
+        if n==(len(xGoal))-1:
+            # lastStep=1 
+            print("waw") 
 
-#         if n>(len(xGoal))-1:
-#             break
+        if n>(len(xGoal))-1:
+            break
 
 # QSave.append(Q[0,0])
 # QSave.append(Q[1,1])
@@ -492,7 +492,7 @@ while 1:
 # KSave.append(K[1,2])
 # KSave.append(K[1,3])
 
-# ###                 -------------------------------data control LQR (com)--------------------------------
+# ###-------------------------------data control LQR (com)--------------------------------
 # #masukin semua data ke excel
 # df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
 # filename="comRead_vs_refCOM_virtual"
