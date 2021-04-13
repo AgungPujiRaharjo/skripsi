@@ -893,3 +893,157 @@ def Controlpola(robot,dxl,base,t,condition='normal'):
     elif condition=='virtual':
         print("sync virtual")
 
+def Control3(robot,dxl,base,t,K,condition='normal'):
+    t=t/1000000 # ubah t dari microsecond ke second
+    tServo=0.1
+    tSmpl=0.1
+
+    m=1.725
+    g=9.80665
+    l=0.19614907857545497
+    ixx=0.092026292
+    iyy=0.087070843
+    bstate1=0.0
+    bstate2=0.0
+
+    # print("comZ:",comNow["z"])
+
+    # #array K full state feedback
+    # K=array([[8,1,0,0], #roll
+    #         [0,0,15,1]]) #pitch
+
+    #ubah status com ke sudut dan kecepatan sudut
+    state1Roll=arctan(comNow["y"]/comNow["z"]) #sudut
+    state2Roll=(state1Roll-controlDict["rollBef"])/tSmpl #kecepatan sudut
+
+    state1Pitch=arctan(comNow["x"]/comNow["z"]) #sudut
+    state2Pitch=(state1Pitch-controlDict["pitchBef"])/tSmpl #kecepatan sudut
+
+    # print("state1Roll:",state1Roll)
+    # print("state1Pitch:",state1Pitch)
+    # print("state2Pitch:",state2Pitch)
+
+    controlDict["pitchBef"],controlDict["rollBef"]=state1Pitch,state1Roll
+
+    #referensi
+    refPitch=arctan(pttrn["Xt"]/comNow["z"])
+    refRoll=arctan(pttrn["Yt"]/comNow["z"])
+    # print("refRoll:",refRoll)
+    # print("refPitch:",refPitch)
+
+    #control parameter
+    uRoll=(K[0,0]*(state1Roll-refRoll))+((K[0,1]*state2Roll))
+    ARoll=degrees((-uRoll+(m*g*l*sin(state1Roll-refRoll)))/iyy)
+
+    uPitch=(K[1,2]*(state1Pitch-refPitch))+((K[1,3]*state2Pitch))
+    APitch=degrees((-uPitch+(m*g*l*sin(state1Pitch-refPitch)))/ixx)
+
+    # print("uPitch:",uPitch)
+    # print("APitch:",APitch)
+    if base==-1: #jika tumpuan kaki kiri
+        
+        deltaRoll=((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2)
+        deltaPitch=((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2)
+
+        controlDict["IAEY"]+=abs(deltaRoll)
+        controlDict["IAEX"]+=abs(deltaPitch)
+        print("deltaRoll:",deltaRoll)
+        print("deltaPitch:",deltaPitch)
+
+        swngPlan["tbase"]=deltaPitch
+
+        #left leg (support)
+        invPttrn["t18"]=dxl[17].prevGoalDegree-deltaRoll
+        invPttrn["t16"]=dxl[15].prevGoalDegree-deltaPitch
+        v18=abs(degrees(state2Roll)+(ARoll*tSmpl))
+        v16=abs(degrees(state2Pitch)+(APitch*tSmpl))
+        invPttrn["t10"]=0 #hip roll
+        #right leg (swing)
+        invPttrn["t17"]=invPttrn["t18"] #base roll
+        invPttrn["t9"]=invPttrn["t18"] #hip roll
+        # print("t9 kirim:",invPttrn["t9"])
+
+        # print("t18roll:",invPttrn["t18"])
+        # print("t16pitch",invPttrn["t16"])
+        # print("v18:",v18)
+        # print("v16:",v16)
+        # print("delta_16_pitch",)
+        invers_walk2(robot,dxl,'ki',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v18,v16,condition='walk2')
+    
+    #------------------------------------------------------------------------------------------
+    elif base==1: #jika tumpuan kaki kanan
+
+        deltaRoll=((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2)
+        deltaPitch=((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2)
+        controlDict["IAEY"]+=abs(deltaRoll)
+        controlDict["IAEX"]+=abs(deltaPitch)
+
+        swngPlan["tbase"]=deltaPitch
+
+        # print("deltaRoll:",deltaRoll)
+        # print("deltaPitch:",deltaPitch)
+
+        #right leg(support) 
+        invPttrn["t17"]=dxl[16].prevGoalDegree-deltaRoll #base roll
+        invPttrn["t15"]=dxl[14].prevGoalDegree+deltaPitch #base pitch
+        invPttrn["t9"]=0 #hip roll
+        v17=abs(degrees(state2Roll)+(ARoll*tSmpl))
+        v15=abs(degrees(state2Pitch)+(APitch*tSmpl))
+        #left leg (swing)
+        invPttrn["t18"]=invPttrn["t17"] #base roll
+        invPttrn["t10"]=invPttrn["t17"] #hip roll
+
+        # print("t17:",invPttrn["t17"])
+        # print("t15:",invPttrn["t15"])
+
+        # print("t10 kirim:",invPttrn["t10"])
+        invers_walk2(robot,dxl,'ka',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v17,v15,condition='walk2')
+           
+    if condition=='normal':
+        robot.syncWrite() 
+    elif condition=='virtual':
+        pass
+
+def tuningLQR(condition):
+    m=1.725 #(kg)
+    g=9.80665 #m/s^2
+    l=0.19614907857545497 #meter
+    ixx=0.0920262919239
+    iyy=0.087070843434217
+    izz=0.00805112193405
+
+    A = np.array([[0,1,0,0],[m*g*l/ixx, 0, 0, 0],[0, 0, 0, 1],[0 ,0, m*g*l/iyy, 0]])
+    B = np.array([[0 ,0],[1/ixx ,0],[0,0],[0 ,1/iyy]])
+    C = np.array([[1, 0, 0 ,0],[0, 0 ,0 ,0],[0, 0 ,1 ,0],[0, 0 ,0 ,0]])
+    D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
+
+    ###ubah ke discrete dengan kembalian berupa state space method zoh
+    # sys = signal.StateSpace(A, B, C, D)
+    # sysd= sys.to_discrete(0.1)
+
+    # ##ubah ke discrete dengan kembalian berupa A,B,C,D,dt methode zoh
+    # sysd=signal.cont2discrete((A,B,C,D),0.1)
+    # A,B,C,D=sysd[0],sysd[1],sysd[2],sysd[3]
+    if condition=='walk':
+        Q = np.array([[200,0,0,0], #roll
+                    [0,0.1,0,0], 
+                    [0,0,200,0], #pitch
+                    [0,0,0,2]])
+
+    elif condition=='translation roll':
+        Q = np.array([[30,0,0,0],
+                    [0,1,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])
+    
+    elif condition=='translation pitch':
+        Q = np.array([[1,0,0,0],
+                    [0,1,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])
+
+    R = np.array([[1,0],[0,1]])
+    K, S, E = ctl.lqr(A, B, Q, R)
+    print("K:",K)
+
+    return Q,K

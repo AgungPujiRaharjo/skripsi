@@ -139,7 +139,7 @@ while 1:
     print("waktu: ", end - start)
 ####--------------------------------------------------------------------------------------
 
-##=============================coba pola dinamis==============
+##=============================coba pola dengan LQR==============
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,20,1)
 # robot.syncWrite()
@@ -184,6 +184,140 @@ while 1:
 
 #         if n>(len(xGoal))-1:
 #             break
+
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# robot.syncWrite()
+# wait(1.5)
+
+# resCOM=COM(robot,dxl,'ki')
+# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
+
+# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+# state1Pitch=arctan(comNow["x"]/comNow["z"])
+# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+# while(1):
+#     inp=input("========press 'enter' to walk, 'i' to init invers = ")
+#     if inp=="":
+#         break
+
+#     elif inp=="i" or inp=="I":
+#         invers(robot,dxl,'ki',0,0,20,1)
+#         invers(robot,dxl,'ka',0,0,20,1)
+#         robot.syncWrite()
+#         wait(1.5)
+
+#         resCOM=COM(robot,dxl,'ki')
+#         comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+#         print("comDef",comDef)
+
+#         state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+#         state1Pitch=arctan(comNow["x"]/comNow["z"])
+#         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+
+# firstStep=1
+# xGoal=[4,4,4,4,4,4,4,4]
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+# lastStep=0
+# Q,K=tuningLQR('walk') #tuning LQR untuk mendapatkan nilai K
+
+# allPttrnXt=[]
+# allPttrnYt=[]
+# allCOMx=[]
+# allCOMy=[]
+# allCOMz=[]
+# allTime=[]
+# QSave=["Q"]
+# KSave=["K"]
+# tp=0
+# fwdDef["x"]=fwdNow["x"]
+
+
+# firstMicros=micros()
+# while(1):
+
+#     t1=time.time()
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+
+#     walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
+#     Control3(robot,dxl,base,t,K)
+
+#     allPttrnXt.append(pttrn["Xt"])
+#     allPttrnYt.append(pttrn["Yt"])
+#     allCOMx.append(comNow["x"])
+#     allCOMy.append(comNow["y"])
+#     allCOMz.append(comNow["z"])
+#     allTime.append((t/1000)+tp)
+#     t2=time.time()
+
+#     wait(0.021)
+
+#     print("t aksi:",t2-t1)
+#     # jika satu langkah telah berakhir
+#     if t/1000000>=tsup: #+0.3: 
+#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+#         base=base*(-1) # switch kaki tumpu
+
+#         #forward dengan membaca semua servo
+#         if base==-1:
+#             res=forward(robot,dxl,'ki')
+#             fwdDef["x"]=res[0]
+#             print("fwd last",res)
+           
+#         elif base==1:
+#             res=forward(robot,dxl,'ka')
+#             fwdDef["x"]=res[0]
+#             print("fwd last",res)
+
+#         wait(0.5)
+#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+#         firstStep=0 # bukan awal langkah lagi      
+#         n+=1
+#         tp+=2000
+#         if n==(len(xGoal))-1:
+#             # lastStep=1 
+#             print("waw") 
+
+#         if n>(len(xGoal))-1:
+#             break
+
+# QSave.append(Q[0,0])
+# QSave.append(Q[1,1])
+# QSave.append(Q[2,2])
+# QSave.append(Q[3,3])
+# KSave.append(K[0,0])
+# KSave.append(K[0,1])
+# KSave.append(K[1,2])
+# KSave.append(K[1,3])
+
+# #masukin semua data ke excel
+# df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+# filename="comRead_vs_refCOM"
+# loc='./src/project_bioloid/program/data/data_com/%s.xlsx' % (filename)
+# df.to_excel(loc, index=True)
+# print("data diinput ke excel bernama : %s.xlsx" % filename)
+
+# print("K",K)
+
+# wb=load_workbook(loc)
+# sh=wb.worksheets[0]
+
+# for i in range(len(QSave)):
+#     sh.cell(row=i+1,column=9,value=QSave[i])
+
+# for i in range(len(KSave)):
+#     sh.cell(row=i+1,column=10,value=KSave[i])
+
+# wb.save(loc)
+# # ##===============================================================
 
 # # -------------------------------default virtual---------------------------------
 # for obj in dxl :
@@ -234,6 +368,151 @@ while 1:
 
 #         if n>(len(xGoal))-1:
 #             break
+
+# ##=============================coba pola dinamis virtual==============
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# wait(1.5)
+
+# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
+
+# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+# state1Pitch=arctan(comNow["x"]/comNow["z"])
+# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+# while(1):
+#     inp=input("========press 'enter' to walk, 'i' to init invers = ")
+#     if inp=="":
+#         break
+
+#     elif inp=="i" or inp=="I":
+#         invers(robot,dxl,'ki',0,0,20,1)
+#         invers(robot,dxl,'ka',0,0,20,1)
+#         wait(1.5)
+
+#         resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+#         comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+#         print("comDef",comDef)
+
+#         state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+#         state1Pitch=arctan(comNow["x"]/comNow["z"])
+#         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+
+# firstStep=1
+# xGoal=[4]
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+# lastStep=0
+# Q,K=tuningLQR('walk') #tuning LQR untuk mendapatkan nilai K
+
+# allPttrnXt=[]
+# allPttrnYt=[]
+# allCOMx=[]
+# allCOMy=[]
+# allCOMz=[]
+# allTime=[]
+# QSave=["Q"]
+# KSave=["K"]
+# tp=0
+# fwdDef["x"]=fwdNow["x"]
+
+# allxBase=[]
+# allxSwing=[]
+# allxPattern=[]
+# alltBase=[]
+# allxFwd=[]
+
+# firstMicros=micros()
+# while(1):
+
+#     t1=time.time()
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+
+#     walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='virtual')
+#     Control3(robot,dxl,base,t,K,condition='virtual')
+
+#     allPttrnXt.append(pttrn["Xt"])
+#     allPttrnYt.append(pttrn["Yt"])
+#     allCOMx.append(comNow["x"])
+#     allCOMy.append(comNow["y"])
+#     allCOMz.append(comNow["z"])
+#     allTime.append((t/1000)+tp)
+
+#     allxBase.append(swngPlan["xbase"])
+#     allxSwing.append(swngPlan["xswing"])
+#     allxPattern.append(swngPlan["sfx"])
+#     alltBase.append(swngPlan["tbase"])
+#     allxFwd.append(swngPlan["xFwd"])
+#     t2=time.time()
+
+#     wait(0.021)
+
+#     print("t aksi:",t2-t1)
+#     # jika satu langkah telah berakhir
+#     if t/1000000>=tsup: #+0.3: 
+#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+#         base=base*(-1) # switch kaki tumpu
+
+#         #forward dengan membaca semua servo
+#         if base==-1:
+#             res=forward(robot,dxl,'ki',readAll_leg='virtual')
+#             fwdDef["x"]=res[0]
+#             print("fwd last",res)
+           
+#         elif base==1:
+#             res=forward(robot,dxl,'ka',readAll_leg='virtual')
+#             fwdDef["x"]=res[0]
+#             print("fwd last",res)
+
+#         wait(0.5)
+#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+#         firstStep=0 # bukan awal langkah lagi      
+#         n+=1
+#         tp+=2000
+#         if n==(len(xGoal))-1:
+#             # lastStep=1 
+#             print("waw") 
+
+#         if n>(len(xGoal))-1:
+#             break
+
+# QSave.append(Q[0,0])
+# QSave.append(Q[1,1])
+# QSave.append(Q[2,2])
+# QSave.append(Q[3,3])
+# KSave.append(K[0,0])
+# KSave.append(K[0,1])
+# KSave.append(K[1,2])
+# KSave.append(K[1,3])
+
+# ###                 -------------------------------data control LQR (com)--------------------------------
+# #masukin semua data ke excel
+# df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+# filename="comRead_vs_refCOM_virtual"
+# loc='./src/project_bioloid/program/data/data_com/%s.xlsx' % (filename)
+# df.to_excel(loc, index=True)
+# print("data diinput ke excel bernama : %s.xlsx" % filename)
+
+# print("K",K)
+
+# wb=load_workbook(loc)
+# sh=wb.worksheets[0]
+
+# for i in range(len(QSave)):
+#     sh.cell(row=i+1,column=9,value=QSave[i])
+
+# for i in range(len(KSave)):
+#     sh.cell(row=i+1,column=10,value=KSave[i])
+
+# wb.save(loc)
+##              -----------------------------------------------------------------------------------------
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
 invers(robot,dxl,'ki',0,0,20,1)
