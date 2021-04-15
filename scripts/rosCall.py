@@ -8,14 +8,17 @@ from dynamixel_sdk_examples.srv import *
 import servo
 from numpy import sin,cos,tan,pi,array,eye,dot,arccos,arcsin,arctan,radians,degrees
 import math
+import numpy as np
+import control as ctl
 
 rospy.init_node("rosCall_node",anonymous=False)
 imuData={"roll":0,"pitch":0,"yaw":0,"refDir":0}
 comDef={"x":0,"y":0,"z":0}
 invPttrn={"la_Ki":0,"la_Ka":0,"t9":0,"t10":0,"t15":0,"t16":0,"t17":0,"t18":0}
-controlDict={"rollBef":0,"pitchBef":0}
+controlDict={"rollBef":0.0,"pitchBef":0.0,"IAEX":0,"IAEY":0}
 pttrn={"Xt":0,"Yt":0,"Zt":0,"sfx":0,"sfy":0,"sfz":0,"xS":0,"xNow:":0}
 fwdNow={"x":0,"y":0,"z":0}
+fwdDef={"x":0}
 comNow={"x":0,"y":0,"z":0}
 comXPolaPeriod=[0,0,0,0,0]
 comYPolaPeriod=[0,0,0,0,0]
@@ -840,59 +843,6 @@ def Control2(robot,dxl,base,t,condition='normal'):
     elif condition=='virtual':
         print("sync virtual")
 #-----------------------------------------------------------------------------------------
-def Controlpola(robot,dxl,base,t,condition='normal'):
-    t=t/1000000 # ubah t dari microsecond ke second
-    tServo=0.1
-
-    #status com
-    state1Pitch=arctan(comNow["x"]/comNow["z"])*180/pi
-    state1Roll=arctan(comNow["y"]/comNow["z"])*180/pi
-    # print("state1Pitch:",state1Pitch)
-    # print("state1Roll:",state1Roll)
-
-    #referensi
-    refPitch=arctan(pttrn["Xt"]/comNow["z"])*180/pi
-    refRoll=arctan(pttrn["Yt"]/comNow["z"])*180/pi 
-    # print("refPitch:",refPitch)
-    # print("refRoll:",refRoll)
-
-    angleRoll=state1Roll-refRoll
-    anglePitch=state1Pitch-refPitch
-    print("angleRoll:",angleRoll)
-    print("anglePitch:",anglePitch)
-
-    if base==-1: #jika tumpuan kaki kiri
-
-        #left leg (support)
-        invPttrn["t18"]=dxl[17].prevGoalDegree+angleRoll #base roll
-        invPttrn["t16"]=dxl[15].prevGoalDegree+anglePitch #base pitch
-        invPttrn["t10"]=0                                 #hip roll
-        #right leg (swing)
-        invPttrn["t17"]=dxl[16].prevGoalDegree+angleRoll #base roll
-        invPttrn["t9"]=dxl[8].prevGoalDegree+angleRoll #hip roll
-        # print("t9 kirim:",invPttrn["t9"])
-
-        invers_walk(robot,dxl,'ki',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],0.1,condition='walk2')
-    
-    #------------------------------------------------------------------------------------------
-    elif base==1: #jika tumpuan kaki kanan
-
-        #right leg(support) 
-        invPttrn["t17"]=dxl[16].prevGoalDegree+angleRoll #base roll
-        invPttrn["t15"]=dxl[14].prevGoalDegree-anglePitch #base pitch
-        invPttrn["t9"]=0                                   #hip roll
-        #left leg (swing)
-        invPttrn["t18"]=dxl[17].prevGoalDegree+angleRoll #base roll
-        invPttrn["t10"]=dxl[9].prevGoalDegree+angleRoll #hip roll
-
-        # print("t10 kirim:",invPttrn["t10"])
-        invers_walk(robot,dxl,'ka',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],0.1,condition='walk2')
-           
-    if condition=='normal':
-        robot.syncWrite() 
-    elif condition=='virtual':
-        print("sync virtual")
-
 def Control3(robot,dxl,base,t,K,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
     tServo=0.1
@@ -950,7 +900,7 @@ def Control3(robot,dxl,base,t,K,condition='normal'):
         print("deltaRoll:",deltaRoll)
         print("deltaPitch:",deltaPitch)
 
-        swngPlan["tbase"]=deltaPitch
+        # swngPlan["tbase"]=deltaPitch
 
         #left leg (support)
         invPttrn["t18"]=dxl[17].prevGoalDegree-deltaRoll
@@ -978,7 +928,7 @@ def Control3(robot,dxl,base,t,K,condition='normal'):
         controlDict["IAEY"]+=abs(deltaRoll)
         controlDict["IAEX"]+=abs(deltaPitch)
 
-        swngPlan["tbase"]=deltaPitch
+        # swngPlan["tbase"]=deltaPitch
 
         # print("deltaRoll:",deltaRoll)
         # print("deltaPitch:",deltaPitch)

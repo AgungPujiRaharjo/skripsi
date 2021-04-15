@@ -22,13 +22,13 @@ def invers(base,x,y,z): # x,y,z dalam cm ; times detik
         z3=l4
         z2=z-z1-z3
         la=math.sqrt((z2**(2))+(x**(2)))
-        tj=((l2**(2))+(la**(2))-(l2**(2)))/(2*l2*la)
+        tj=((l2**(2))+(la**(2))-(l3**(2)))/(2*l2*la)
         tj=arccos(tj)*180/pi
         tk=arcsin(x/la)*180/pi
  
         t12=tj+tk #sudut theta 12
 
-        t12=t12-3.7996
+        t12=t12-3.7996      #menyesuaikan sudutnya dengan mengurangi 4 derajat
 
         tm=((l2**(2))+(l3**(2))-(la**(2)))/(2*l2*l3)
         tm=arccos(tm)*180/pi

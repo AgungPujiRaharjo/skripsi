@@ -10,8 +10,9 @@ from rosCall import *
 from library.common.time_lib import *
 from dynamixel_sdk import *
 import pandas as pd
-# from listener import data
+import numpy as np
 
+# from listener import data
 if os.name == 'nt':
     import msvcrt
     def getch():
@@ -89,7 +90,7 @@ dxl.append(servo.Servo(516,18,portHandler,packetHandler))
 groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, ADDR_AX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 
-# # Open port
+# Open port
 # if robot.portHandler.openPort():
 #     print("Succeeded to open the port")
 # else:
@@ -98,7 +99,7 @@ robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 #     getch()
 #     quit()
 
-# Set port baudrate
+# # Set port baudrate
 # if robot.portHandler.setBaudRate(BAUDRATE):
 #     print("Succeeded to change the baudrate")
 # else:
@@ -107,7 +108,7 @@ robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 #     getch()
 #     quit()
     
-# Enable Dynamixel#1 Torque
+# # Enable Dynamixel#1 Torque
 # robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 
 # # program untuk duduk 
@@ -137,7 +138,7 @@ robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 #             indexMoving = indexMoving + i
 #     end = time.time()
 #     print("waktu: ", end - start)
-####--------------------------------------------------------------------------------------
+###--------------------------------------------------------------------------------------
 
 ##=============================coba pola dengan LQR==============
 # invers(robot,dxl,'ki',0,0,20,1)
@@ -322,9 +323,9 @@ robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 # -------------------------------default virtual---------------------------------
 for obj in dxl :
     obj.moveSync(obj.default, 2,0,type='reg',read=0)
-# ##-------------------------------------------------------------------------------
+# # ##-------------------------------------------------------------------------------
 
-# # # # # ##=============================coba pola dinamis virtual==============
+# # # # ##=============================coba pola dinamis virtual==============
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,20,1)
 # wait(1.5)
@@ -515,108 +516,108 @@ while(1):
 ##              -----------------------------------------------------------------------------------------
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
-# dxl[17].moveSync(-15,1)
-# dxl[8].moveSync(-14,1)
-# dxl[16].moveSync(-15,1)
-robot.syncWrite()
-wait(1.5)
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# # dxl[17].moveSync(-15,1)
+# # dxl[8].moveSync(-14,1)
+# # dxl[16].moveSync(-15,1)
+# robot.syncWrite()
+# wait(1.5)
 
-t15=robot.readOne(15)#,data='float')
-t16=robot.readOne(16)#,data='float')
-t11=robot.readOne(11)#,data='float')
-t12=robot.readOne(12)#,data='float')
+# t15=robot.readOne(15)#,data='float')
+# t16=robot.readOne(16)#,data='float')
+# t11=robot.readOne(11)#,data='float')
+# t12=robot.readOne(12)#,data='float')
 
-angleData=[]
-comX=[]
-comY=[]
-comZ=[]
-imuRoll=[]
-imuPitch=[]
+# angleData=[]
+# comX=[]
+# comY=[]
+# comZ=[]
+# imuRoll=[]
+# imuPitch=[]
 
-angle=0
-#------uji roll semakin positif
-while(1):
-    print("uji pitch semakin positif-----Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
-    # s16=robot.readOne(16,data='float')
+# angle=0
+# #------uji roll semakin positif
+# while(1):
+#     print("uji pitch semakin positif-----Press any key to continue! (or press ESC to quit!)")
+#     if getch() == chr(0x1b):
+#         break
+#     # s16=robot.readOne(16,data='float')
 
-    angleData.append(angle)#s16-t16)
-    print("angle:",angle)#s16-t16)
+#     angleData.append(angle)#s16-t16)
+#     print("angle:",angle)#s16-t16)
 
-    #kirim servo engkel pitch
-    dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
-    dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
-    dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
-    dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
-    robot.syncWrite()
-    wait(0.5)
+#     #kirim servo engkel pitch
+#     dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
+#     dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
+#     dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
+#     dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
+#     robot.syncWrite()
+#     wait(0.5)
 
-    #dapetin com
-    x,y,z=COM(robot,dxl,'ki')
-    comX.append(x)
-    comY.append(y)
-    comZ.append(z)
+#     #dapetin com
+#     x,y,z=COM(robot,dxl,'ki')
+#     comX.append(x)
+#     comY.append(y)
+#     comZ.append(z)
 
-    #dapetin imu
-    roll,pitch=getMpu()
-    imuRoll.append(roll)
-    imuPitch.append(pitch)
+#     #dapetin imu
+#     roll,pitch=getMpu()
+#     imuRoll.append(roll)
+#     imuPitch.append(pitch)
     
-    angle=angle+1 #ditambah 1 drajat nih (semakin positif)
+#     angle=angle+1 #ditambah 1 drajat nih (semakin positif)
     
-angle=0
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
-# dxl[17].moveSync(-15,1)
-# dxl[8].moveSync(-14,1)
-# dxl[16].moveSync(-15,1)
-robot.syncWrite()
-wait(1.5)
+# angle=0
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# # dxl[17].moveSync(-15,1)
+# # dxl[8].moveSync(-14,1)
+# # dxl[16].moveSync(-15,1)
+# robot.syncWrite()
+# wait(1.5)
 
-t15=robot.readOne(15)#,data='float')
-t16=robot.readOne(16)#,data='float')
-t11=robot.readOne(11)#,data='float')
-t12=robot.readOne(12)#,data='float')
+# t15=robot.readOne(15)#,data='float')
+# t16=robot.readOne(16)#,data='float')
+# t11=robot.readOne(11)#,data='float')
+# t12=robot.readOne(12)#,data='float')
 
-while(1):
-    print("uji pitch semakin negatif-----Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
+# while(1):
+#     print("uji pitch semakin negatif-----Press any key to continue! (or press ESC to quit!)")
+#     if getch() == chr(0x1b):
+#         break
     
-    # s16=robot.readOne(16,data='float')
+#     # s16=robot.readOne(16,data='float')
 
-    angleData.append(angle)#s16-t16)
-    print("angle:",angle)#s16-t16)
+#     angleData.append(angle)#s16-t16)
+#     print("angle:",angle)#s16-t16)
 
-    #kirim servo engkel pitch
-    dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
-    dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
-    dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
-    dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
-    robot.syncWrite()
-    wait(0.5)
+#     #kirim servo engkel pitch
+#     dxl[14].moveSync(t15-angle,0.5,dxl[14].prevGoal,read=0) #servo 15 engkel
+#     dxl[15].moveSync(t16+angle,0.5,dxl[15].prevGoal,read=0) #servo 16 engkel
+#     dxl[10].moveSync(t11-angle,0.5,dxl[10].prevGoal,read=0) #servo 11 hip
+#     dxl[11].moveSync(t12+angle,0.5,dxl[11].prevGoal,read=0) #servo 12 hip
+#     robot.syncWrite()
+#     wait(0.5)
 
-    #dapetin com
-    x,y,z=COM(robot,dxl,'ki')
-    comX.append(x)
-    comY.append(y)
-    comZ.append(z)
+#     #dapetin com
+#     x,y,z=COM(robot,dxl,'ki')
+#     comX.append(x)
+#     comY.append(y)
+#     comZ.append(z)
 
-    #dapetin imu
-    roll,pitch=getMpu()
-    imuRoll.append(roll)
-    imuPitch.append(pitch)
+#     #dapetin imu
+#     roll,pitch=getMpu()
+#     imuRoll.append(roll)
+#     imuPitch.append(pitch)
     
-    angle=angle-1 #dikurang 1 derajat(semakin negatif)
+#     angle=angle-1 #dikurang 1 derajat(semakin negatif)
 
-#masukin semua data ke excel
-df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
-df.to_excel('./src/program/data pitch kemiringan robot double support dengan hip (invers).xlsx', index=False)
-print("sudah diinput ke excel")
-#=========================================================================================
+# #masukin semua data ke excel
+# df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
+# df.to_excel('./src/program/data pitch kemiringan robot double support dengan hip (invers).xlsx', index=False)
+# print("sudah diinput ke excel")
+# #=========================================================================================
 
 
 # ==========================ambil data uji kemiringan robot (roll)=========================
