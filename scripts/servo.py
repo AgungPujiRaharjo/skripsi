@@ -105,8 +105,11 @@ class Servo:
             self.speed = time/0.111
         
         elif time_type == 'omega':
-            rpm=(time/(2*pi))*60
+            rpm=time*0.16667
+            # rpm=time*9.549297
             self.speed=rpm/0.111
+            # rpm=(time/(2*pi))*60
+            # self.speed=rpm/0.111
             # print('id: ', self.id, 'speed: ', self.speed*0.111, 'type: RPM')
         # else:
         #     self.speed = time #register

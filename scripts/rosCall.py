@@ -10,6 +10,8 @@ from numpy import sin,cos,tan,pi,array,eye,dot,arccos,arcsin,arctan,radians,degr
 import math
 import numpy as np
 import control as ctl
+import scipy.linalg
+from scipy import signal
 
 rospy.init_node("rosCall_node",anonymous=False)
 imuData={"roll":0,"pitch":0,"yaw":0,"refDir":0}
@@ -611,7 +613,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             x1=comNow["x"]
             x2=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
             y1=comYPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
-            y2=yg*0
+            y2=yg*10
 
             sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
             print("fwdXNow:",fwdNow["x"])
@@ -1144,9 +1146,9 @@ def tuningLQR(condition):
     # sysd=signal.cont2discrete((A,B,C,D),0.1)
     # A,B,C,D=sysd[0],sysd[1],sysd[2],sysd[3]
     if condition=='walk':
-        Q = np.array([[1,0,0,0], #roll
-                    [0,0.1,0,0], 
-                    [0,0,1,0], #pitch
+        Q = np.array([[5,0,0,0], #roll
+                    [0,1,0,0], 
+                    [0,0,5,0], #pitch
                     [0,0,0,1]])
 
     elif condition=='translation roll':
@@ -1166,3 +1168,254 @@ def tuningLQR(condition):
     print("K:",K)
 
     return Q,K
+
+def tuningLQRdiskrit(condition):
+
+    ###dengan baterai
+    m=1.725 #(kg)
+    g=9.80665 #m/s^2
+    l=0.19614907857545497 #meter
+    ixx=0.0920262919239
+    iyy=0.087070843434217
+    izz=0.00805112193405
+
+    # #tanpa baterai
+    # m=1.634 #(kg)
+    # g=9.80665 #m/s^2
+    # l=0.19614907857545497 #meter
+    # ixx=0.084143172
+    # iyy=0.079494614
+    # izz=0.00757168
+
+    A = np.array([[0,1,0,0],[m*g*l/ixx, 0, 0, 0],[0, 0, 0, 1],[0 ,0, m*g*l/iyy, 0]])
+    B = np.array([[0 ,0],[1/ixx ,0],[0,0],[0 ,1/iyy]])
+    C = np.array([[1, 0, 0 ,0],[0, 0 ,0 ,0],[0, 0 ,1 ,0],[0, 0 ,0 ,0]])
+    D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
+
+    if condition=='walk':
+        Q = np.array([[1000,0,0,0], #roll
+                    [0,1,0,0], 
+                    [0,0,1000,0], #pitch
+                    [0,0,0,1]])
+
+    elif condition=='walkc':
+        Q = np.array([[200,0,0,0], #roll
+                    [0,0.1,0,0], 
+                    [0,0,200,0], #pitch
+                    [0,0,0,2]])
+
+    elif condition=='translation roll':
+        Q = np.array([[30,0,0,0],
+                    [0,1,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])
+    
+    elif condition=='translation pitch':
+        Q = np.array([[1,0,0,0],
+                    [0,1,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])
+    
+    elif condition=='coba':
+        Q = np.array([[1,0,0,0],
+                    [0,1,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])       
+
+    R = np.array([[1,0],[0,1]])
+
+    # ##ubah ke discrete dengan kembalian berupa state space method zoh
+    # sys = signal.StateSpace(A, B, C, D)
+    # sysd= sys.to_discrete(0.1)
+    # print("sysd",sysd)
+
+    ##ubah ke discrete dengan kembalian berupa A,B,C,D,dt methode zoh
+    sysd=signal.cont2discrete((A,B,C,D),0.1)
+    A,B,C,D=sysd[0],sysd[1],sysd[2],sysd[3]
+    print(A,B,C,D)
+
+    ##------------mencari K dari system discrete----------------------
+    ## first, solve the ricatti equation
+    P = np.matrix(scipy.linalg.solve_discrete_are(A, B, Q, R))
+    # compute the LQR gain
+    K = np.matrix(scipy.linalg.inv(B.T*P*B+R)*(B.T*P*A))
+    # print("K",K)
+    #----------------------------------------------------------------
+
+    # #-----------mencari K dari system continue-----------------------
+    # K, S, E = ctl.lqr(A,B, Q, R)
+    # #----------------------------------------------------------------
+    return Q,K
+
+def cntTransPitch(robot,dxl,base,K,t,condition='normal'):
+
+    t=t/1000000 # ubah t dari microsecond ke second
+    tServo=0.1
+    tSmpl=0.1
+
+    m=1.725
+    g=9.80665
+    l=0.19614907857545497
+    ixx=0.092026292
+    iyy=0.087070843
+    bstate1=0.0
+    bstate2=0.0
+    print("===========================================")
+    print("t:",t)
+    if condition=='normal':
+        COM(robot,dxl,'ki',readAll_leg='base')
+    elif condition=='virtual':
+        COM(robot,dxl,'ki',readAll_leg='virtual')
+
+    #ubah status com ke sudut dan kecepatan sudut
+    state1Pitch=arctan(comNow["x"]/comNow["z"]) #sudut
+    state2Pitch=(state1Pitch-controlDict["pitchBef"])/tSmpl #kecepatan sudut
+
+    controlDict["pitchBef"]=state1Pitch
+
+    #referensi
+    refPitch=arctan(pttrn["Xt"]/comDef["zt"])
+
+    #control parameter
+    uPitch=(K[1,2]*(state1Pitch-refPitch))+((K[1,3]*state2Pitch-0))
+    APitch=degrees((-uPitch+(m*g*l*sin(state1Pitch-refPitch)))/iyy)
+
+    deltaPitch=((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2)
+    # print(deltaRoll)
+        
+    #left leg (support)
+    invPttrn["t16"]=dxl[15].prevGoalDegree-deltaPitch #base pitch
+    v16=abs(degrees(state2Pitch)+(APitch*tSmpl))
+    
+    #right leg (swing)
+    invPttrn["t15"]=dxl[14].prevGoalDegree-deltaPitch #base pitch
+    v15=abs(degrees(state2Pitch)+(APitch*tSmpl))
+
+    invers_translasi_pitch(robot,dxl,'ki',0,0,0,tSmpl,v16,v15)
+    
+    if condition=='normal':
+        robot.syncWrite() 
+    elif condition=='virtual':
+        pass
+
+def cntTransRoll(robot,dxl,base,K,t,condition='normal'):
+    t=t/1000000 # ubah t dari microsecond ke second
+    tServo=0.1
+    tSmpl=0.1
+
+    m=1.725
+    g=9.80665
+    l=0.19614907857545497
+    ixx=0.092026292
+    iyy=0.087070843
+    bstate1=0.0
+    bstate2=0.0
+    print("===========================================")
+    print("t:",t)
+    if condition=='normal':
+        COM(robot,dxl,'ki',readAll_leg='base')
+    elif condition=='virtual':
+        COM(robot,dxl,'ki',readAll_leg='virtual')
+
+    #ubah status com ke sudut dan kecepatan sudut
+    state1Roll=arctan(comNow["y"]/comNow["z"]) #sudut
+    state2Roll=(state1Roll-controlDict["rollBef"])/tSmpl #kecepatan sudut
+
+    controlDict["rollBef"]=state1Roll
+
+    #referensi
+    refRoll=arctan(pttrn["Yt"]/comDef["zt"])
+
+    #control parameter
+    uRoll=(K[0,0]*(state1Roll-refRoll))+((K[0,1]*state2Roll-0))
+    ARoll=degrees((-uRoll+(m*g*l*sin(state1Roll-refRoll)))/iyy)
+
+    deltaRoll=((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2)
+    # print(deltaRoll)
+        
+    #left leg (support)
+    invPttrn["t18"]=dxl[17].prevGoalDegree-deltaRoll #base roll
+    v18=abs(degrees(state2Roll)+(ARoll*tSmpl))
+    invPttrn["t10"]=dxl[9].prevGoalDegree-deltaRoll #hip roll
+    
+    #right leg (swing)
+    invPttrn["t17"]=invPttrn["t18"] #base roll
+    v17=abs(degrees(state2Roll)+(ARoll*tSmpl))
+    invPttrn["t9"]=invPttrn["t18"]#hip roll
+
+    # print("t18",invPttrn["t18"])
+    # print("t17",invPttrn["t17"])
+
+    # print("v18:",v18)
+    # print("v17:",v17)
+
+    invers_translasi_roll(robot,dxl,'ki',0,0,0,tSmpl,v18,v17)
+    
+    if condition=='normal':
+        robot.syncWrite() 
+    elif condition=='virtual':
+        pass
+
+def invers_translasi_roll(robot,dxl,base,x,y,z,times,v18,v17):
+
+    IK_w=rospy.ServiceProxy('compute_invers_walk',ComputeInversWalk)
+    req=ComputeInversWalkRequest()
+    
+    req.base.data=base
+    req.coordinatX.data=x
+    req.coordinatY.data=y
+    req.coordinatZ.data=z
+
+    req.length_la.data=invPttrn["la_Ki"]
+    req.t_EngkleBaseRoll.data=invPttrn["t18"]
+    req.t_EngkleBasePitch.data=-invPttrn["t16"]
+
+    resp=IK_w.call(req)
+    angle = [float(x) for x in resp.angleServo.data.split(",")]
+    t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5],angle[6],angle[7],angle[8],angle[9],angle[10],angle[11]
+
+    dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+    dxl[9].moveSync(invPttrn["t10"],times,dxl[9].prevGoal,read=0)
+    dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+    dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+    dxl[15].moveSync(t16,times,dxl[15].prevGoal,read=0)
+    dxl[17].moveSync(invPttrn["t18"],v18,dxl[17].prevGoal,time_type='omega',read=0)
+
+    dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+    dxl[8].moveSync(invPttrn["t9"],times,dxl[8].prevGoal,read=0)
+    dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+    dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+    dxl[14].moveSync(t15,times,dxl[14].prevGoal,read=0)
+    dxl[16].moveSync(invPttrn["t17"],v17,dxl[16].prevGoal,time_type='omega',read=0)
+
+def invers_translasi_pitch(robot,dxl,base,x,y,z,times,v16,v15):
+
+    IK_w=rospy.ServiceProxy('compute_invers_walk',ComputeInversWalk)
+    req=ComputeInversWalkRequest()
+    
+    req.base.data=base
+    req.coordinatX.data=x
+    req.coordinatY.data=y
+    req.coordinatZ.data=z
+
+    req.length_la.data=invPttrn["la_Ki"]
+    req.t_EngkleBaseRoll.data=invPttrn["t18"]
+    req.t_EngkleBasePitch.data=-invPttrn["t16"]
+
+    resp=IK_w.call(req)
+    angle = [float(x) for x in resp.angleServo.data.split(",")]
+    t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5],angle[6],angle[7],angle[8],angle[9],angle[10],angle[11]
+
+    dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+    dxl[9].moveSync(t10,times,dxl[9].prevGoal,read=0)
+    dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+    dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+    dxl[15].moveSync(invPttrn["t16"],v16,dxl[15].prevGoal,time_type='omega',read=0)
+    dxl[17].moveSync(t18,times,dxl[17].prevGoal,read=0)
+
+    dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+    dxl[8].moveSync(t9,times,dxl[8].prevGoal,read=0)
+    dxl[10].moveSync(invPttrn["t15"],times,dxl[10].prevGoal,read=0)
+    dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+    dxl[14].moveSync(invPttrn["t15"],times,dxl[14].prevGoal,time_type='omega',read=0)
+    dxl[16].moveSync(t17,times,dxl[16].prevGoal,read=0)        
