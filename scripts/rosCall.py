@@ -564,7 +564,7 @@ def walkUpdate(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'
 
 def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
-    
+    print("first step=",firstStep)
     if base==-1: #base kaki kiri
         yg=-1 #pengali untuk merubah kaki tumpuan
         Xtc=1
@@ -607,13 +607,13 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
         
         elif firstStep==0: #jika bukan awal melangkah
-
+            print("hallo")
             t1=0
             t2=tsup/4+0.1
             x1=comNow["x"]
             x2=comXPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
             y1=comYPolaPeriod[4]*(-1) #-1 karena ganti kaki tumpuan
-            y2=yg*10
+            y2=yg*0
 
             sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
             print("fwdXNow:",fwdNow["x"])
@@ -631,6 +631,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         comYPolaPeriod[1]=Yt
         print("==================Periode 1=====================")
         
+
     #periode 2
     elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
         Xt=0
@@ -673,7 +674,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         x1=comXPolaPeriod[3]
         x2=(xGoal*10/2)+comDef["x"]
         y1=comYPolaPeriod[3]
-        y2=-yg*comDef["y"]
+        y2=(-yg*comDef["y"])-18
         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
         sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
@@ -696,10 +697,10 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             
         # sfy=0
 
-    comXPolaPeriod[4]=Xt
-    comYPolaPeriod[4]=Yt
-    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
-    print("==================Periode 4=====================")
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
+        print("==================Periode 4=====================")
 
     print("base kaki kiri" if base==-1 else "base kaki kanan" )
     print("Xt=",Xt)
@@ -1193,10 +1194,10 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[1000,0,0,0], #roll
-                    [0,1,0,0], 
-                    [0,0,1000,0], #pitch
-                    [0,0,0,1]])
+        Q = np.array([[2000,0,0,0], #roll
+                    [0,0.1,0,0], 
+                    [0,0,2000,0], #pitch
+                    [0,0,0,0.1]])
 
     elif condition=='walkc':
         Q = np.array([[200,0,0,0], #roll

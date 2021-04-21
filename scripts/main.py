@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 #sudo chmod a+rw /dev/ttyUSB0
+#source devel/setup.bash
 import rospy
 import os
 import time
@@ -68,7 +69,7 @@ TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
 
 
-##-----------------------Posisi default 
+##-----------------------Posisi default-----------------------------------
 dxl.append(servo.Servo(205,1,portHandler,packetHandler)) 
 dxl.append(servo.Servo(818,2,portHandler,packetHandler)) 
 dxl.append(servo.Servo(279,3,portHandler,packetHandler))
@@ -143,7 +144,7 @@ while 1:
     print("waktu: ", end - start)
 ###--------------------------------------------------------------------------------------
 
-# #=============================coba pola==============
+#=============================coba pola==============
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,20,1)
 # robot.syncWrite()
@@ -225,7 +226,7 @@ while(1):
         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
 firstStep=1
-xGoal=[4,4,4]
+xGoal=[2,2]
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
@@ -281,12 +282,11 @@ while(1):
             fwdDef["x"]=res[0]
             print("fwd last",res)
 
-        wait(0.5)
-        firstMicros=micros() #perbaharui waktu dari awal (0 detik)
         wait(0.5) 
+        firstMicros=micros() #perbaharui waktu dari awal (0 detik)
         firstStep=0 # bukan awal langkah lagi      
         n+=1
-        tp+=2000
+        tp+=tsup*1000
         if n==(len(xGoal))-1:
             # lastStep=1 
             print("waw") 
@@ -310,7 +310,7 @@ while(1):
 # df.to_excel(loc, index=True)
 # print("data diinput ke excel bernama : %s.xlsx" % filename)
 
-print("K",K)
+# print("K",K)
 
 # wb=load_workbook(loc)
 # sh=wb.worksheets[0]
@@ -408,7 +408,7 @@ print("K",K)
 
 
 # firstStep=1
-# xGoal=[4]
+# xGoal=[4,4]
 # n=0
 # base=-1 # -1 base kaki kiri, 1 base kaki kanan
 # tsmp=0.1 #waktu sampling
@@ -525,23 +525,23 @@ fig.tight_layout(pad=2.0)
 
 #--------jika ingin grafik dalam bentuk com-----------
 axs[0].set_title('sumbu X',loc="left")
-axs[0].plot(allTime,allPttrnXt,"r",label='COM Referensi')
-axs[0].plot(allTime,allCOMx,"y",label="COM Dibaca")
+axs[0].plot(allTime,allPttrnXt,"g",label='COM Referensi')
+axs[0].plot(allTime,allCOMx,"c",label="COM Dibaca")
 axs[0].legend(loc="upper left")
 axs[0].grid()
 axs[0].set_xlabel("time (ms)")
 axs[0].set_ylabel("COM X (mm)")
 
 axs[1].set_title('sumbu Y',loc="left")
-axs[1].plot(allTime,allPttrnYt,"r",label='COM Referensi')
-axs[1].plot(allTime,allCOMy,"y",label="COM Dibaca")
-axs[1].legend(loc="lower right")
+axs[1].plot(allTime,allPttrnYt,"g",label='COM Referensi')
+axs[1].plot(allTime,allCOMy,"c",label="COM Dibaca")
+axs[1].legend(loc="upper left")
 axs[1].grid()
 axs[1].set_xlabel("time (ms)")
 axs[1].set_ylabel("COM Y (mm)")
 #--------------------------------------------------------
 
-plt.savefig('./src/project_bioloid/program/data/data_plot/com vs ref com.png')
+plt.savefig('./src/program/data/data plot com vs ref com.png')
 # ##======================================================================
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
@@ -747,29 +747,29 @@ plt.savefig('./src/project_bioloid/program/data/data_plot/com vs ref com.png')
 # print("sudah diinput ke excel")
 # #=========================================================================================
 
-##------------------------------------plot com----------------------------------
-fig, axs = plt.subplots(2)
-fig.tight_layout(pad=2.0)
+# ##------------------------------------plot com----------------------------------
+# fig, axs = plt.subplots(2)
+# fig.tight_layout(pad=2.0)
 
-#--------jika ingin grafik dalam bentuk com-----------
-axs[0].set_title('sumbu X',loc="left")
-axs[0].plot(allTime,allPttrnXt,"r",label='COM Referensi')
-axs[0].plot(allTime,allCOMx,"y",label="COM Dibaca")
-axs[0].legend(loc="upper left")
-axs[0].grid()
-axs[0].set_xlabel("time (ms)")
-axs[0].set_ylabel("COM X (mm)")
+# #--------jika ingin grafik dalam bentuk com-----------
+# axs[0].set_title('sumbu X',loc="left")
+# axs[0].plot(allTime,allPttrnXt,"r",label='COM Referensi')
+# axs[0].plot(allTime,allCOMx,"y",label="COM Dibaca")
+# axs[0].legend(loc="upper left")
+# axs[0].grid()
+# axs[0].set_xlabel("time (ms)")
+# axs[0].set_ylabel("COM X (mm)")
 
-axs[1].set_title('sumbu Y',loc="left")
-axs[1].plot(allTime,allPttrnYt,"r",label='COM Referensi')
-axs[1].plot(allTime,allCOMy,"y",label="COM Dibaca")
-axs[1].legend(loc="lower right")
-axs[1].grid()
-axs[1].set_xlabel("time (ms)")
-axs[1].set_ylabel("COM Y (mm)")
-#--------------------------------------------------------
+# axs[1].set_title('sumbu Y',loc="left")
+# axs[1].plot(allTime,allPttrnYt,"r",label='COM Referensi')
+# axs[1].plot(allTime,allCOMy,"y",label="COM Dibaca")
+# axs[1].legend(loc="lower right")
+# axs[1].grid()
+# axs[1].set_xlabel("time (ms)")
+# axs[1].set_ylabel("COM Y (mm)")
+# #--------------------------------------------------------
 
-plt.savefig('./src/program/data/data_plot com vs ref com.png')
+# plt.savefig('./src/program/data/data_plot com vs ref com.png')
 # ###=========================================================
 
 # ##=============================coba pola dinamis==============
