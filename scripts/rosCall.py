@@ -606,8 +606,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             
             pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
         
-        elif firstStep==0: #jika bukan awal melangkah
-            print("hallo")
+        elif firstStep==0: #jika bukan awal melangkahs0000                                                                                                         0
             t1=0
             t2=tsup/4+0.1
             x1=comNow["x"]
@@ -649,8 +648,17 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     
     #periode 3
     elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
-        Xt=((t-(tsup/2))*1/(tsup/4))
-        Yt=(yg*Ytc)-((t-(tsup/2))*(1*yg)/(tsup/4))-3
+        t1=(tsup/2)+0.1
+        t2=(3*tsup/4)+0.15
+        x1=comXPolaPeriod[2]      
+        x2=(xGoal*10/2)+comDef["x"]
+        y1=comYPolaPeriod[2]
+        y2=yg*0 #yg*0 15
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        # Xt=((t-(tsup/2))*1/(tsup/4))
+        # Yt=(yg*Ytc)-((t-(tsup/2))*(1*yg)/(tsup/4))-3
 
         sfy=0
         sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
@@ -668,11 +676,11 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         print("==================Periode 3=====================")
 
     #periode 4
-    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.25):
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.1):
         t1=(3*tsup/4)+0.15
-        t2=(tsup)+0.25
+        t2=(tsup)+0.1
         x1=comXPolaPeriod[3]
-        x2=(xGoal*10/2)+comDef["x"]
+        x2=(xGoal*10/2)+comDef["x"]+15
         y1=comYPolaPeriod[3]
         y2=(-yg*comDef["y"])-18
         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
@@ -729,10 +737,6 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         elif condition=='virtual':
             COM(robot,dxl,'ka',readAll_leg='virtual')
 
-    swngPlan["xFwd"]=fwdNow["x"]/10
-
-    pttrn["Zt"]=comNow["z"]
-
     print("t:",t)
 
     #periode 1
@@ -741,22 +745,35 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             t1=0
             t2=tsup/4+0.1
             y1=-yg*comDef["y"]
-            y2=yg*(-5)
+            y2=yg*0
             Xt=comDef["x"]
             Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            sfx=0
+            sfy=0
+            sfz=0
+            Zt=comDef["z"]+(t*(17-comDef["z"])/(tsup/4)+0.1)
             
+            pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
+        
         elif firstStep==0: #jika bukan awal melangkah
-          
             t1=0
             t2=tsup/4+0.1
             x1=comNow["x"]
-            x2=comDef["x"]
-            # x2=comXPolaPeriod[4]*(-1)
-            y1=comNow["y"] #-1 karena ganti kaki tumpuan
+            x2=comXPolaPeriod[4]*(-1)
+            y1=comYPolaPeriod[4]*(-1)
             y2=yg*0
+
+            sfx=(fwdNow["x"]/10)-((t*comNow["x"]/10)/((tsup/4)+0.1))
+            print("fwdXNow:",fwdNow["x"])
+            sfy=0
+            sfz=sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+            if sfz<0:
+                sfz=0
 
             Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
             Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+           
+            pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
          
         comXPolaPeriod[1]=Xt
         comYPolaPeriod[1]=Yt
@@ -768,11 +785,27 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         t1=(tsup/4)+0.1
         t2=(tsup/2)+0.1
         y1=comYPolaPeriod[1]
-        y2=yg*(-5)
-        Xt=comDef["x"]
+        y2=yg*0  #yg*0
+        x1=comXPolaPeriod[1]
+        x2=(xGoal*10/2)+comDef["x"]
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        # Xt=comDef["x"]
+        # if firstStep==1:
+        #     Xt=comDef["x"]
+        # elif firstStep==0:
+        #     x1=comXPolaPeriod[1]
+        #     x2=(xGoal*10/2)+comDef["x"]
+        #     Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+
         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
         comXPolaPeriod[2]=Xt
         comYPolaPeriod[2]=Yt
+
+        sfy=0
+        sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
+        sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+
+        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
 
         print("==================Periode 2=====================")
     
@@ -780,97 +813,63 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
         t1=(tsup/2)+0.1
         t2=(3*tsup/4)+0.15
-
-        x1=comXPolaPeriod[2]
-        if firstStep==1:
-            x2=(comDef["x"]+((xGoal*10/2)+comDef["x"]))/2
-        else:
-            x2=(xGoal*10/2)+comDef["x"]
-        # x2=(xGoal*10/2)+comDef["x"]
+        x1=comXPolaPeriod[2]      
+        x2=(xGoal*10/2)+comDef["x"]
         y1=comYPolaPeriod[2]
-        y2=yg*(0) #yg*0
+        y2=yg*0 #yg*0 15
         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        sfy=0
+        sfx= (((xGoal-pttrn["xS"])/(2*3.14))*(((2*3.14*(t-(tsup/4)))/(tsup/2))-sin((2*3.14*(t-(tsup/4)))/(tsup/2))))+pttrn["xS"]
+        sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+        if sfz<0:
+            sfz=0
+
+        if sfx>xGoal:
+            sfx=xGoal
 
         comXPolaPeriod[3]=Xt
         comYPolaPeriod[3]=Yt
         
+        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
         print("==================Periode 3=====================")
 
     # #periode 4
-    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.25):
-        
-        #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
-        if lastStep==0:
-            
-            t1=(3*tsup/4)+0.15
-            t2=(tsup)+0.25
-            x1=comXPolaPeriod[3]
-            x2=(xGoal*10/2)+comDef["x"]
-            y1=comYPolaPeriod[3]
-            y2=-yg*comDef["y"]
-            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-
-
-        #jika akhir langkah dan akan berhenti (kaki sejajar)
-        elif lastStep==1:
-            
-            t1=(3*tsup/4)+0.15
-            t2=(tsup)+0.25
-            x1=comXPolaPeriod[3]
-            x2=comDef["x"]
-            y1=comYPolaPeriod[3]
-            y2=-yg*comDef["y"]
-            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
-        
-        comXPolaPeriod[4]=Xt
-        comYPolaPeriod[4]=Yt
-        print("==================Periode 4=====================")
-
-
-    #-----------pattern swing------------------------
-    sH=2 #tinggi maksimum langkah
-
-    if t<=(tsup/4):
-        sfx=fwdDef["x"]/10
-        sfy=0
-        sfz=0
-
-    elif t>(tsup/4):
-        t1=tsup/4
-        t2=tsup
-
-        sfx1=fwdDef["x"]/10 #posisi kaki awal sumbu x (cm)
-        sfx2=xGoal #posisi kaki tujuan
-
-        if t<=(5/8)*tsup:
-            tz1=tsup/4
-            tz2=((5/8)*tsup)
-            sfz1=pttrn["sfz"]
-            sfz2=sH
-        elif t>(5/8)*tsup:
-            tz1=((5/8)*tsup)
-            tz2=tsup+0.25
-            sfz1=pttrn["sfz"]
-            sfz2=0
-
-        sfy=0
-        sfx=round(((t-t1)/(t2-t1)*(sfx2-sfx1))+sfx1,3)
-        sfz=round(((t-tz1)/(tz2-tz1)*(sfz2-sfz1))+sfz1,3)
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.1):
+        t1=(3*tsup/4)+0.15
+        t2=(tsup)+0.1
+        x1=comXPolaPeriod[3]
+        x2=(xGoal*10/2)+comDef["x"]+20
+        y1=comYPolaPeriod[3]
+        y2=(-yg*comDef["y"])
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+        sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
+        sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
         if sfz<0:
             sfz=0
+        if sfx>xGoal:
+            sfx=xGoal
+        sfy=0
+
+        # Xt=((t-(3*tsup/4))*xGoal/(tsup/4))
+        # Yt=(4*yg)-((t-(3*tsup/4))*(4*yg)/(tsup/4))
+        # sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
+        # sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
+        # if sfz<0:
+        #     sfz=0
+
         # if sfx>xGoal:
         #     sfx=xGoal
-    #---------------------------------------------------
+            
+        # sfy=0
 
-    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
-
-    #for swing planning
-    swngPlan["sfx"]=pttrn["sfx"]
-
-    
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
+        print("==================Periode 4=====================")    
+        
     print("base kaki kiri" if base==-1 else "base kaki kanan" )
     print("Xt=",Xt)
     print("Yt=",Yt)
@@ -881,6 +880,7 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     print("================================================")
 
     # return Xt,Yt,sfx,sfy,sfz
+
 
 def Control(robot,dxl,base,t,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second

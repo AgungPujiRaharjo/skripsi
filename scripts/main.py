@@ -226,11 +226,11 @@ while(1):
         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
 firstStep=1
-xGoal=[2,2]
+xGoal=[2,2,2,2]
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
-tsup=2 #waktu total satu langkah
+tsup=2.2 #waktu total satu langkah
 lastStep=0
 Q,K=tuningLQRdiskrit('walk') #tuning LQR untuk mendapatkan nilai K
 
@@ -252,7 +252,7 @@ while(1):
     currentMicros=micros()
     t=currentMicros-firstMicros
 
-    walkUpdate2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
+    walkUpdate3(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
     Control3(robot,dxl,base,t,K)
 
     allPttrnXt.append(pttrn["Xt"])
