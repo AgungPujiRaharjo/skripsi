@@ -759,7 +759,7 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             t1=0
             t2=tsup/4+0.1
             x1=comNow["x"]
-            x2=comXPolaPeriod[4]*(-1)
+            x2=comXPolaPeriod[4]*(-1)+10
             y1=comYPolaPeriod[4]*(-1)
             y2=yg*0
 
@@ -785,17 +785,10 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         t1=(tsup/4)+0.1
         t2=(tsup/2)+0.1
         y1=comYPolaPeriod[1]
-        y2=yg*0  #yg*0
+        y2=yg*0 
         x1=comXPolaPeriod[1]
         x2=(xGoal*10/2)+comDef["x"]
         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
-        # Xt=comDef["x"]
-        # if firstStep==1:
-        #     Xt=comDef["x"]
-        # elif firstStep==0:
-        #     x1=comXPolaPeriod[1]
-        #     x2=(xGoal*10/2)+comDef["x"]
-        #     Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
 
         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
         comXPolaPeriod[2]=Xt
@@ -853,18 +846,6 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             sfx=xGoal
         sfy=0
 
-        # Xt=((t-(3*tsup/4))*xGoal/(tsup/4))
-        # Yt=(4*yg)-((t-(3*tsup/4))*(4*yg)/(tsup/4))
-        # sfx=xGoal+((t-(3*tsup/4))*xGoal/(tsup/4))
-        # sfz = sH-((sH)*(1-sin((3.14*((t-(tsup/4))))/(tsup/2))))
-        # if sfz<0:
-        #     sfz=0
-
-        # if sfx>xGoal:
-        #     sfx=xGoal
-            
-        # sfy=0
-
         comXPolaPeriod[4]=Xt
         comYPolaPeriod[4]=Yt
         pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
@@ -880,7 +861,6 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
     print("================================================")
 
     # return Xt,Yt,sfx,sfy,sfz
-
 
 def Control(robot,dxl,base,t,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
@@ -1194,10 +1174,10 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[2000,0,0,0], #roll
-                    [0,0.1,0,0], 
-                    [0,0,2000,0], #pitch
-                    [0,0,0,0.1]])
+        Q = np.array([[9000,0,0,0], #roll
+                    [0,1,0,0], 
+                    [0,0,6000,0], #pitch
+                    [0,0,0,1]])
 
     elif condition=='walkc':
         Q = np.array([[200,0,0,0], #roll

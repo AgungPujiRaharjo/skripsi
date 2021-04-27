@@ -316,7 +316,7 @@ base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
 tsup=2 #waktu total satu langkah
 lastStep=0
-Q,K=tuningLQR('walk') #tuning LQR untuk mendapatkan nilai K
+Q,K=tuningLQRdiskrit('walk') #tuning LQR untuk mendapatkan nilai K
 
 allPttrnXt=[]
 allPttrnYt=[]
@@ -395,7 +395,7 @@ while(1):
 # df.to_excel(loc, index=True)
 # print("data diinput ke excel bernama : %s.xlsx" % filename)
 
-# print("K",K)
+print("K",K)
 
 # wb=load_workbook(loc)
 # sh=wb.worksheets[0]
