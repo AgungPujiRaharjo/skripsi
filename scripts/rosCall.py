@@ -1174,8 +1174,8 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[9000,0,0,0], #roll
-                    [0,1,0,0], 
+        Q = np.array([[7000,0,0,0], #roll
+                    [0,0.1,0,0], 
                     [0,0,6000,0], #pitch
                     [0,0,0,1]])
 
