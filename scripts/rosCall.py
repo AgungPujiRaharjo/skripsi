@@ -1192,7 +1192,7 @@ def tuningLQRdiskrit(condition):
                     [0,0,0,1]])
     
     elif condition=='translation pitch':
-        Q = np.array([[1,0,0,0],
+        Q = np.array([[30,0,0,0],
                     [0,1,0,0],
                     [0,0,1,0],
                     [0,0,0,1]])

@@ -547,105 +547,105 @@ while 1:
 
 # ==========================ambil data uji kemiringan robot (roll)=========================
 
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,17,1) #17
-dxl[17].moveSync(-19,1)
-dxl[8].moveSync(-14,1)
-dxl[16].moveSync(-17,1) #15
-robot.syncWrite()
-wait(1.5)
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,17,1) #17
+# dxl[17].moveSync(-19,1)
+# dxl[8].moveSync(-14,1)
+# dxl[16].moveSync(-17,1) #15
+# robot.syncWrite()
+# wait(1.5)
 
-t17=robot.readOne(17)
-t18=robot.readOne(18)
-t9=robot.readOne(9)
-t10=robot.readOne(10)
+# t17=robot.readOne(17)
+# t18=robot.readOne(18)
+# t9=robot.readOne(9)
+# t10=robot.readOne(10)
 
-angleData=[]
-comX=[]
-comY=[]
-comZ=[]
-imuRoll=[]
-imuPitch=[]
+# angleData=[]
+# comX=[]
+# comY=[]
+# comZ=[]
+# imuRoll=[]
+# imuPitch=[]
 
-angle=0 #-15
-#------uji roll semakin positif
-while(1):
-    print("uji roll semakin positif-----Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
+# angle=0 #-15
+# #------uji roll semakin positif
+# while(1):
+#     print("uji roll semakin positif-----Press any key to continue! (or press ESC to quit!)")
+#     if getch() == chr(0x1b):
+#         break
     
-    angleData.append(angle)
-    print("angle:",angle)
+#     angleData.append(angle)
+#     print("angle:",angle)
 
-    #kirim servo engkel roll
-    dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
-    dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
-    dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
-    # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip
-    robot.syncWrite()
-    wait(0.5)
+#     #kirim servo engkel roll
+#     dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
+#     dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
+#     # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip
+#     robot.syncWrite()
+#     wait(0.5)
 
-    #dapetin com
-    x,y,z=COM(robot,dxl,'ki')
-    comX.append(x)
-    comY.append(y)
-    comZ.append(z)
+#     #dapetin com
+#     x,y,z=COM(robot,dxl,'ki')
+#     comX.append(x)
+#     comY.append(y)
+#     comZ.append(z)
 
-    #dapetin imu
-    roll,pitch=getMpu()
-    imuRoll.append(roll)
-    imuPitch.append(pitch)
+#     #dapetin imu
+#     roll,pitch=getMpu()
+#     imuRoll.append(roll)
+#     imuPitch.append(pitch)
     
-    angle=angle+1 #ditambah 1 drajat nih (semakin positif)
+#     angle=angle+1 #ditambah 1 drajat nih (semakin positif)
     
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,17,1)
-dxl[17].moveSync(-19,1)
-dxl[8].moveSync(-14,1)
-dxl[16].moveSync(-18,1) #15
-robot.syncWrite()
-wait(1.5)
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,17,1)
+# dxl[17].moveSync(-19,1)
+# dxl[8].moveSync(-14,1)
+# dxl[16].moveSync(-18,1) #15
+# robot.syncWrite()
+# wait(1.5)
 
-t17=robot.readOne(17)
-t18=robot.readOne(18)
-t9=robot.readOne(9)
-t10=robot.readOne(10)
+# t17=robot.readOne(17)
+# t18=robot.readOne(18)
+# t9=robot.readOne(9)
+# t10=robot.readOne(10)
 
-angle=0 #-15
+# angle=0 #-15
 
-while(1):
-    print("uji roll semakin negatif-----Press any key to continue! (or press ESC to quit!)")
-    if getch() == chr(0x1b):
-        break
+# while(1):
+#     print("uji roll semakin negatif-----Press any key to continue! (or press ESC to quit!)")
+#     if getch() == chr(0x1b):
+#         break
     
-    angleData.append(angle)
-    print("angle:",angle)
+#     angleData.append(angle)
+#     print("angle:",angle)
 
-    #kirim servo engkel roll
-    dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
-    dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
-    dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
-    # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip dimattin kalau single
-    robot.syncWrite()
-    wait(0.5)
+#     #kirim servo engkel roll
+#     dxl[16].moveSync(t17+angle,0.5,dxl[16].prevGoal,read=0) #servo 17
+#     dxl[17].moveSync(t18+angle,0.5,dxl[17].prevGoal,read=0) #servo 18
+#     dxl[8].moveSync(t9+angle,0.5,dxl[8].prevGoal,read=0) #servo 9 hip
+#     # dxl[9].moveSync(t10+angle,0.5,dxl[9].prevGoal,read=0) #servo 10 hip dimattin kalau single
+#     robot.syncWrite()
+#     wait(0.5)
 
-    #dapetin com
-    x,y,z=COM(robot,dxl,'ki')
-    comX.append(x)
-    comY.append(y)
-    comZ.append(z)
+#     #dapetin com
+#     x,y,z=COM(robot,dxl,'ki')
+#     comX.append(x)
+#     comY.append(y)
+#     comZ.append(z)
 
-    #dapetin imu
-    roll,pitch=getMpu()
-    imuRoll.append(roll)
-    imuPitch.append(pitch)
+#     #dapetin imu
+#     roll,pitch=getMpu()
+#     imuRoll.append(roll)
+#     imuPitch.append(pitch)
     
-    angle=angle-1 #dikurang 1 drajat nih (semakin negatif)
+#     angle=angle-1 #dikurang 1 drajat nih (semakin negatif)
 
-#masukin semua data ke excel
-df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
-df.to_excel('./src/program/data/data kemiringan robot roll single support base kiri.xlsx', index=False)
-print("sudah diinput ke excel")
+# #masukin semua data ke excel
+# df = pd.DataFrame({'sudut':angleData,'com X':comX,'com Y':comY,'com Z':comZ,'imu Roll':imuRoll,'imu Pitch':imuPitch})
+# df.to_excel('./src/program/data/data kemiringan robot roll single support base kiri.xlsx', index=False)
+# print("sudah diinput ke excel")
 #=========================================================================================
 
 # ##------------------------------------plot com----------------------------------
@@ -896,8 +896,8 @@ print("sudah diinput ke excel")
 # tsmp=0.1 #waktu sampling
 # tsup=2 #waktu 
 
-# Q,K=tuningLQR('translation roll')
-# pttrn["Yt"]=-5
+# Q,K=tuningLQRdiskrit('translation roll')
+# pttrn["Yt"]=-20
 # pttrn["Zt"]=comDef["zt"]
 # base='ki'
 
@@ -937,12 +937,12 @@ print("sudah diinput ke excel")
 # KSave.append(K[1,2])
 # KSave.append(K[1,3])
 
-# #masukin semua data ke excel
-# df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
-# filename="tuning COM translasi roll"
-# loc='./src/project_bioloid/program/data/data_com/%s.xlsx' % (filename)
-# df.to_excel(loc, index=True)
-# print("data diinput ke excel bernama : %s.xlsx" % filename)
+# # #masukin semua data ke excel
+# # df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+# # filename="tuning COM translasi roll"
+# # loc='./src/project_bioloid/program/data/data_com/%s.xlsx' % (filename)
+# # df.to_excel(loc, index=True)
+# # print("data diinput ke excel bernama : %s.xlsx" % filename)
 
 # print("Q",Q)
 # print("K",K)
@@ -961,92 +961,93 @@ print("sudah diinput ke excel")
 
 
 # ##================================uji translasi pitch ===============================
-# allPttrnXt=[]
-# allPttrnYt=[]
-# allPttrnZt=[]
-# allCOMx=[]
-# allCOMy=[]
-# allCOMz=[]
-# allTime=[]
+allPttrnXt=[]
+allPttrnYt=[]
+allPttrnZt=[]
+allCOMx=[]
+allCOMy=[]
+allCOMz=[]
+allTime=[]
 
-# invers(robot,dxl,'ki',0,0,20,1)
-# invers(robot,dxl,'ka',0,0,20,1)
-# # robot.syncWrite()
-# wait(1.2)
+invers(robot,dxl,'ki',0,0,20,1)
+invers(robot,dxl,'ka',0,0,20,1)
+# robot.syncWrite()
+wait(1.2)
 
-# t16def=dxl[15].prevGoalDegree
-# t15def=dxl[14].prevGoalDegree
-# t12def=dxl[11].prevGoalDegree
-# t11def=dxl[10].prevGoalDegree
-# # print("t16",t16def)
-# # print("t15",t15def)
-# # print("t12",t12def)
-# # print("t15",t11def)
+t16def=dxl[15].prevGoalDegree
+t15def=dxl[14].prevGoalDegree
+t12def=dxl[11].prevGoalDegree
+t11def=dxl[10].prevGoalDegree
+# print("t16",t16def)
+# print("t15",t15def)
+# print("t12",t12def)
+# print("t15",t11def)
 
-# # resCOM=COM(robot,dxl,'ki')
-# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
-# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
-# print("comDef",comDef)
-# wait(0.1)
+# resCOM=COM(robot,dxl,'ki')
+resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+print("comDef",comDef)
+wait(0.1)
 
 
-# tawal=-13
-# # dxl[15].moveSync(t16def+tawal,1) #servo 16
-# # dxl[14].moveSync(t15def-tawal,1) #servo 15
-# # dxl[11].moveSync(t12def-tawal,1) #servo 12
-# # dxl[10].moveSync(t11def+tawal,1) #servo 11
-# # robot.syncWrite()
-# # wait(1.5)
+tawal=-7 #-13
+dxl[15].moveSync(t16def+tawal,1) #servo 16
+dxl[14].moveSync(t15def-tawal,1) #servo 15
+dxl[11].moveSync(t12def-tawal,1) #servo 12
+dxl[10].moveSync(t11def+tawal,1) #servo 11
+robot.syncWrite()
+wait(1.5)
 
 # dxl[15].moveSync(t16def+tawal,1,dxl[15].prevGoal,read=0) #servo 16
 # dxl[14].moveSync(t15def-tawal,1,dxl[14].prevGoal,read=0) #servo 15
 # dxl[11].moveSync(t12def-tawal,1,dxl[11].prevGoal,read=0) #servo 12
 # dxl[10].moveSync(t11def+tawal,1,dxl[10].prevGoal,read=0) #servo 11
+# robot.syncWrite()
 # wait(1.5)
 
-# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
 
-# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
-# state1Pitch=arctan(comNow["x"]/comNow["z"])
-# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
-# wait(0.1)
+state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+state1Pitch=arctan(comNow["x"]/comNow["z"])
+controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+wait(0.1)
 
-# tsmp=0.1 #waktu sampling
-# tsup=2 #waktu 
+tsmp=1 #waktu sampling
+tsup=2 #waktu 
 
 # K=array([[6.78371241,1.49951986,0,0], #roll
 #         [0,0,4,1.47693166]]) #pitch
-# # Q,K=tuningLQR('translation pitch')
-# pttrn["Xt"]=comDef["x"]
-# pttrn["Zt"]=comDef["zt"]
-# base='ki'
+Q,K=tuningLQRdiskrit('translation pitch')
+pttrn["Xt"]=comDef["x"]
+pttrn["Zt"]=comDef["zt"]
+base='ki'
 
-# firstMicros=micros()
-# while(1):
+firstMicros=micros()
+while(1):
     
-#     print("ref comX",pttrn["Xt"])
-#     # t1=time.time()
-#     currentMicros=micros()
-#     t=currentMicros-firstMicros
-#     # print("waktu",t)
+    print("ref comX",pttrn["Xt"])
+    # t1=time.time()
+    currentMicros=micros()
+    t=currentMicros-firstMicros
+    # print("waktu",t)
 
-#     t1=time.time()
-#     # cntTransPitch(robot,dxl,base,K,t)
-#     cntTransPitch(robot,dxl,base,K,t,condition='virtual')
+    t1=time.time()
+    # cntTransPitch(robot,dxl,base,K,t)
+    cntTransPitch(robot,dxl,base,K,t,condition='normal')
 
-#     allPttrnXt.append(pttrn["Xt"])
-#     allPttrnYt.append(pttrn["Yt"])
-#     allPttrnZt.append(pttrn["Zt"])
-#     allCOMx.append(comNow["x"])
-#     allCOMy.append(comNow["y"])
-#     allCOMz.append(comNow["z"])
-#     allTime.append(t/1000)
-#     t2=time.time()
-#     print("tot",t2-t1)
-#     wait(0.03)
+    allPttrnXt.append(pttrn["Xt"])
+    allPttrnYt.append(pttrn["Yt"])
+    allPttrnZt.append(pttrn["Zt"])
+    allCOMx.append(comNow["x"])
+    allCOMy.append(comNow["y"])
+    allCOMz.append(comNow["z"])
+    allTime.append(t/1000)
+    t2=time.time()
+    print("tot",t2-t1)
+    wait(0.03)
 
-#     if t/1000000>=tsup:
-#         break
+    if t/1000000>=tsup:
+        break
     
 # #masukin semua data ke excel
 # df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
@@ -1055,6 +1056,6 @@ print("sudah diinput ke excel")
 # df.to_excel(loc, index=True)
 # print("data diinput ke excel bernama : %s.xlsx" % filename)
 
-# # print("Q",Q)
-# print("K",K)
+print("Q",Q)
+print("K",K)
 # ####=====================================================
