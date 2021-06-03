@@ -1153,20 +1153,20 @@ def tuningLQR(condition):
 def tuningLQRdiskrit(condition):
 
     ###dengan baterai
-    m=1.725 #(kg)
-    g=9.80665 #m/s^2
-    l=0.19614907857545497 #meter
-    ixx=0.0920262919239
-    iyy=0.087070843434217
-    izz=0.00805112193405
-
-    # #tanpa baterai
-    # m=1.634 #(kg)
+    # m=1.725 #(kg)
     # g=9.80665 #m/s^2
     # l=0.19614907857545497 #meter
-    # ixx=0.084143172
-    # iyy=0.079494614
-    # izz=0.00757168
+    # ixx=0.0920262919239
+    # iyy=0.087070843434217
+    # izz=0.00805112193405
+
+    #tanpa baterai
+    m=1.634 #(kg)
+    g=9.80665 #m/s^2
+    l=0.19614907857545497 #meter
+    ixx=0.084143172
+    iyy=0.079494614
+    izz=0.00757168
 
     A = np.array([[0,1,0,0],[m*g*l/ixx, 0, 0, 0],[0, 0, 0, 1],[0 ,0, m*g*l/iyy, 0]])
     B = np.array([[0 ,0],[1/ixx ,0],[0,0],[0 ,1/iyy]])
@@ -1186,15 +1186,15 @@ def tuningLQRdiskrit(condition):
                     [0,0,0,2]])
 
     elif condition=='translation roll':
-        Q = np.array([[30,0,0,0],
-                    [0,1,0,0],
+        Q = np.array([[500,0,0,0],
+                    [0,0.01,0,0],
                     [0,0,1,0],
                     [0,0,0,1]])
     
     elif condition=='translation pitch':
-        Q = np.array([[30,0,0,0],
-                    [0,1,0,0],
-                    [0,0,1,0],
+        Q = np.array([[1000,0,0,0],
+                    [0,10,0,0],
+                    [0,0,10,0],
                     [0,0,0,1]])
     
     elif condition=='coba':
@@ -1269,7 +1269,7 @@ def cntTransPitch(robot,dxl,base,K,t,condition='normal'):
     v16=abs(degrees(state2Pitch)+(APitch*tSmpl))
     
     #right leg (swing)
-    invPttrn["t15"]=dxl[14].prevGoalDegree-deltaPitch #base pitch
+    invPttrn["t15"]=dxl[14].prevGoalDegree+deltaPitch #base pitch
     v15=abs(degrees(state2Pitch)+(APitch*tSmpl))
 
     invers_translasi_pitch(robot,dxl,'ki',0,0,0,tSmpl,v16,v15)
@@ -1396,7 +1396,7 @@ def invers_translasi_pitch(robot,dxl,base,x,y,z,times,v16,v15):
 
     dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
     dxl[8].moveSync(t9,times,dxl[8].prevGoal,read=0)
-    dxl[10].moveSync(invPttrn["t15"],times,dxl[10].prevGoal,read=0)
+    dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
     dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
     dxl[14].moveSync(invPttrn["t15"],times,dxl[14].prevGoal,time_type='omega',read=0)
     dxl[16].moveSync(t17,times,dxl[16].prevGoal,read=0)        

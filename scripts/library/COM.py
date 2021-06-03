@@ -23,7 +23,7 @@ mKakiBawah=82
 mKakiAtas=30
 mHip=129
 mTempurung=15
-mBadanTangan=893
+mBadanTangan=802 #893 pake baterai
 
 matriks_fwd=[]
 
