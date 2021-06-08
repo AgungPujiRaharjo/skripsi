@@ -92,7 +92,7 @@ def invers(robot,dxl,base,x,y,z,time):
         t8,t9,t11,t13,t15,t17=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5]
 
         dxl[7].moveSync(t8,time,dxl[6].prevGoal,read=0)
-        dxl[8].moveSync(t9,time,dxl[8].prevGoal,read=0)
+        # dxl[8].moveSync(t9,time,dxl[8].prevGoal,read=0)
         dxl[10].moveSync(t11,time,dxl[10].prevGoal,read=0)
         dxl[12].moveSync(t13,time,dxl[12].prevGoal,read=0)
         dxl[14].moveSync(t15,time,dxl[14].prevGoal,read=0)
@@ -1190,8 +1190,20 @@ def tuningLQRdiskrit(condition):
                     [0,0.01,0,0],
                     [0,0,1,0],
                     [0,0,0,1]])
+
+    elif condition=='translation roll 1 kaki':
+        Q = np.array([[1000,0,0,0],
+                    [0,0.01,0,0],
+                    [0,0,1,0],
+                    [0,0,0,1]])
     
     elif condition=='translation pitch':
+        Q = np.array([[1000,0,0,0],
+                    [0,10,0,0],
+                    [0,0,10,0],
+                    [0,0,0,1]])
+
+    elif condition=='translation pitch 1 kaki':
         Q = np.array([[1000,0,0,0],
                     [0,10,0,0],
                     [0,0,10,0],
@@ -1274,10 +1286,10 @@ def cntTransPitch(robot,dxl,base,K,t,condition='normal'):
 
     invers_translasi_pitch(robot,dxl,'ki',0,0,0,tSmpl,v16,v15)
     
-    if condition=='normal':
-        robot.syncWrite() 
-    elif condition=='virtual':
-        pass
+    # if condition=='normal':
+    #     robot.syncWrite() 
+    # elif condition=='virtual':
+    #     pass
 
 def cntTransRoll(robot,dxl,base,K,t,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
@@ -1332,10 +1344,10 @@ def cntTransRoll(robot,dxl,base,K,t,condition='normal'):
 
     invers_translasi_roll(robot,dxl,'ki',0,0,0,tSmpl,v18,v17)
     
-    if condition=='normal':
-        robot.syncWrite() 
-    elif condition=='virtual':
-        pass
+    # if condition=='normal':
+    #     robot.syncWrite() 
+    # elif condition=='virtual':
+    #     pass
 
 def invers_translasi_roll(robot,dxl,base,x,y,z,times,v18,v17):
 
@@ -1387,16 +1399,16 @@ def invers_translasi_pitch(robot,dxl,base,x,y,z,times,v16,v15):
     angle = [float(x) for x in resp.angleServo.data.split(",")]
     t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5],angle[6],angle[7],angle[8],angle[9],angle[10],angle[11]
 
-    dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
-    dxl[9].moveSync(t10,times,dxl[9].prevGoal,read=0)
+    # dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+    # dxl[9].moveSync(t10,times,dxl[9].prevGoal,read=0)
     dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
-    dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+    # dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
     dxl[15].moveSync(invPttrn["t16"],v16,dxl[15].prevGoal,time_type='omega',read=0)
-    dxl[17].moveSync(t18,times,dxl[17].prevGoal,read=0)
+    # dxl[17].moveSync(t18,times,dxl[17].prevGoal,read=0)
 
-    dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
-    dxl[8].moveSync(t9,times,dxl[8].prevGoal,read=0)
-    dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
-    dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
-    dxl[14].moveSync(invPttrn["t15"],times,dxl[14].prevGoal,time_type='omega',read=0)
-    dxl[16].moveSync(t17,times,dxl[16].prevGoal,read=0)        
+    # dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+    # dxl[8].moveSync(t9,times,dxl[8].prevGoal,read=0)
+    # dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+    # dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+    # dxl[14].moveSync(invPttrn["t15"],times,dxl[14].prevGoal,time_type='omega',read=0)
+    # dxl[16].moveSync(t17,times,dxl[16].prevGoal,read=0)        
