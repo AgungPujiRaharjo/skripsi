@@ -1200,8 +1200,8 @@ def tuningLQRdiskrit(condition):
     elif condition=='translation pitch':
         Q = np.array([[1,0,0,0],
                     [0,1,0,0],
-                    [0,0,230,0],
-                    [0,0,0,0.0001]])
+                    [0,0,33.998667,0],
+                    [0,0,0,0.3256]])
 
     elif condition=='translation pitch 1 kaki':
         Q = np.array([[1000,0,0,0],
@@ -1401,7 +1401,7 @@ def invers_translasi_pitch(robot,dxl,base,x,y,z,times,v16,v15):
 
     dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
     dxl[9].moveSync(t10,times,dxl[9].prevGoal,read=0)
-    dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0) #kalau pitch 1 kaki ini aja yg nyala
+    dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0) #pake biasa kalau pitch 1 kaki ini aja yg nyala
     dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
     dxl[15].moveSync(invPttrn["t16"],v16,dxl[15].prevGoal,time_type='omega',read=0) #kalau pitch 1 kaki ini aja yg nyala
     dxl[17].moveSync(t18,times,dxl[17].prevGoal,read=0)

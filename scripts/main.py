@@ -15,6 +15,7 @@ import numpy as np
 import scipy.linalg
 from scipy import signal
 import matplotlib.pyplot as plt
+from openpyxl import load_workbook
 
 # from listener import data
 if os.name == 'nt':
@@ -977,6 +978,8 @@ allCOMx=[]
 allCOMy=[]
 allCOMz=[]
 allTime=[]
+QSave=["Q"]
+KSave=["K"]
 
 invers(robot,dxl,'ki',0,0,20,1)
 invers(robot,dxl,'ka',0,0,20,1)
@@ -994,7 +997,7 @@ comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],r
 print("comDef",comDef)
 wait(0.1)
 
-tawal=-7 #-13
+tawal=-6 #-7
 dxl[15].moveSync(t16def+tawal,1) #servo 16
 dxl[14].moveSync(t15def-tawal,1) #servo 15
 dxl[11].moveSync(t12def-tawal,1) #servo 12
@@ -1036,7 +1039,7 @@ while(1):
     t1=time.time()
     cntTransPitch(robot,dxl,base,K,t)
     robot.syncWrite()
-    wait(0.5)
+    # wait(0.5)
     # cntTransPitch(robot,dxl,base,K,t,condition='normal')
 
     allPttrnXt.append(pttrn["Xt"])
@@ -1048,11 +1051,20 @@ while(1):
     allTime.append(t/1000)
     t2=time.time()
     print("tot",t2-t1)
-    wait(0.03)
+    wait(0.05)
 
     if t/1000000>=tsup:
         break
-    
+
+QSave.append(Q[0,0])
+QSave.append(Q[1,1])
+QSave.append(Q[2,2])
+QSave.append(Q[3,3])
+KSave.append(K[0,0])
+KSave.append(K[0,1])
+KSave.append(K[1,2])
+KSave.append(K[1,3])
+
 #masukin semua data ke excel
 df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
 filename="tuning COM translasi pitch"
@@ -1070,6 +1082,17 @@ plt.xlabel("time (ms)")
 plt.ylabel("COM X (mm)")
 plt.show()
 plt.savefig('./src/program/data/data translasi pitch.png')
+
+wb=load_workbook(loc)
+sh=wb.worksheets[0]
+
+for i in range(len(QSave)):
+    sh.cell(row=i+1,column=9,value=QSave[i])
+
+for i in range(len(KSave)):
+    sh.cell(row=i+1,column=10,value=KSave[i])
+
+wb.save(loc)
 
 # # ==============================================
 ##------------------------------translasi roll kaki 1--------
