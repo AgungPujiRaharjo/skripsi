@@ -95,7 +95,7 @@ dxl.append(servo.Servo(516,18,portHandler,packetHandler))
 groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, ADDR_AX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 robot = rh.Robot(dxl,portHandler,packetHandler,groupSyncWrite)
 
-# # Open port
+# Open port
 if robot.portHandler.openPort():
     print("Succeeded to open the port")
 else:
@@ -104,7 +104,7 @@ else:
     getch()
     quit()
 
-# # # Set port baudrate
+# # Set port baudrate
 if robot.portHandler.setBaudRate(BAUDRATE):
     print("Succeeded to change the baudrate")
 else:
@@ -139,7 +139,7 @@ while 1:
     print("waktu: ", end - start)
 ###--------------------------------------------------------------------------------------
 
-#-----------------------------------coba pola dengan LQR---------------------------------
+# # -----------------------------------coba pola dengan LQR---------------------------------
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,20,1)
 # robot.syncWrite()
@@ -174,11 +174,11 @@ while 1:
 #         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
 # firstStep=1
-# xGoal=[2,2,2,2]
+# xGoal=[2,2,2,2,2,2]
 # n=0
 # base=-1 # -1 base kaki kiri, 1 base kaki kanan
 # tsmp=0.1 #waktu sampling
-# tsup=2 #waktu total satu langkah
+# tsup=1.5 #waktu total satu langkah
 # lastStep=0
 # Q,K=tuningLQRdiskrit('walk') #tuning LQR untuk mendapatkan nilai K
 
@@ -200,7 +200,7 @@ while 1:
 #     currentMicros=micros()
 #     t=currentMicros-firstMicros
 
-#     walkUpdate3(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep)
+#     walkUpdate3(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep) #biasanya 3
 #     Control3(robot,dxl,base,t,K)
 
 #     allPttrnXt.append(pttrn["Xt"])
@@ -230,7 +230,8 @@ while 1:
 #             fwdDef["x"]=res[0]
 #             print("fwd last",res)
 
-#         wait(0.15) 
+#         wait(0.25) 
+        
 #         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
 #         firstStep=0 # bukan awal langkah lagi      
 #         n+=1
@@ -254,7 +255,7 @@ while 1:
 # #masukin semua data ke excel
 # df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
 # filename="comRead_vs_refCOM"
-# loc='./src/project_bioloid/program/data/data_com/%s.xlsx' % (filename)
+# loc='./src/program/data/%s.xlsx' % (filename)
 # df.to_excel(loc, index=True)
 # print("data diinput ke excel bernama : %s.xlsx" % filename)
 
@@ -270,7 +271,7 @@ while 1:
 #     sh.cell(row=i+1,column=10,value=KSave[i])
 
 # wb.save(loc)
-# # ##===============================================================
+# ##===============================================================
 
 # -------------------------------default virtual---------------------------------
 # for obj in dxl :
@@ -408,31 +409,197 @@ while 1:
 #     sh.cell(row=i+1,column=10,value=KSave[i])
 
 # wb.save(loc)
-##              -----------------------------------------------------------------------------------------
+# ##              -----------------------------------------------------------------------------------------
 
-# #------------------------------------plot com----------------------------------
-# fig, axs = plt.subplots(2)
-# fig.tight_layout(pad=2.0)
+##=============================coba pola dengan kendali LQR pola reyhan==============
+invers(robot,dxl,'ki',0,0,20,1)
+invers(robot,dxl,'ka',0,0,20,1)
+robot.syncWrite()
+wait(1.5)
 
-# #--------jika ingin grafik dalam bentuk com-----------
-# axs[0].set_title('sumbu X',loc="left")
-# axs[0].plot(allTime,allPttrnXt,"g",label='COM Referensi')
-# axs[0].plot(allTime,allCOMx,"r",label="COM Dibaca")
-# axs[0].legend(loc="upper left")
-# axs[0].grid()
-# axs[0].set_xlabel("time (ms)")
-# axs[0].set_ylabel("COM X (mm)")
+resCOM=COM(robot,dxl,'ki')
+comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+print("comDef",comDef)
+wait(0.1)
+# comDef["x"]=comDef["x"]+3
 
-# axs[1].set_title('sumbu Y',loc="left")
-# axs[1].plot(allTime,allPttrnYt,"g",label='COM Referensi')
-# axs[1].plot(allTime,allCOMy,"r",label="COM Dibaca")
-# axs[1].legend(loc="upper left")
-# axs[1].grid()
-# axs[1].set_xlabel("time (ms)")
-# axs[1].set_ylabel("COM Y (mm)")
-# #--------------------------------------------------------
+comDefKi=comDef["x"]+3
+comDefKa=comDef["x"]+4 #+5 com saat itu posisi nya kurang pas
 
-# plt.savefig('./src/program/data/data plot com vs ref com.png')
+state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+state1Pitch=arctan(comNow["x"]/comNow["z"])
+controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+while(1):
+    inp=input("========press 'enter' to walk, 'i' to init invers = ")
+    if inp=="":
+        break
+
+firstStep=1
+xGoal=[2,2,2,2,2,2]
+n=0
+base=-1 # -1 base kaki kiri, 1 base kaki kanan
+tsmp=0.1 #waktu sampling
+tsup=1 #waktu total satu langkah
+lastStep=0
+Q,K=tuningLQRdiskrit('coba') #tuning LQR untuk mendapatkan nilai K
+# print(K)
+
+allPttrnXt=[]
+allPttrnYt=[]
+allCOMx=[]
+allCOMy=[]
+allCOMz=[]
+allTime=[]
+QSave=["Q"]
+KSave=["K"]
+tp=0
+fwdDef["x"]=fwdNow["x"]
+
+allxBase=[]
+allxSwing=[]
+allxPattern=[]
+alltBase=[]
+allxFwd=[]
+
+t=0
+pttrn["Xt"]=comDef["x"]
+pttrn["Yt"]=(-base)*comDef["y"]
+allPttrnXt.append(pttrn["Xt"])
+allPttrnYt.append(pttrn["Yt"])
+allTime.append(t)
+
+firstMicros=micros()
+
+while(1):
+    t1=time.time()
+    currentMicros=micros()
+    t=currentMicros-firstMicros
+
+    walkUpdaterey(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
+    Controlrey(robot,dxl,base,t,K)
+    robot.syncWrite()
+
+    #------------himpun untuk plot com------------------
+    allPttrnXt.append(pttrn["Xt"])
+    allPttrnYt.append(pttrn["Yt"])
+    allCOMx.append(comNow["x"])
+    allCOMy.append(comNow["y"])
+    allCOMz.append(comNow["z"])
+    if t>tsup*1000000:
+        tapnd=tsup*1000000
+        allTime.append((tapnd/1000)+tp)
+    else:
+        allTime.append((t/1000)+tp)
+    
+    # allTime.append((t/1000)+tp)
+    #---------------------------------------------------
+
+    t2=time.time()
+    print("waktu dibutuhkan:",t2-t1)
+    # wait(0.021)
+    wait(0.001)
+
+    # jika satu langkah telah berakhir
+    if t/1000000>=tsup +0.08: 
+        print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+        base=base*(-1) # switch kaki tumpu
+        wait(0.3)
+
+        #forward
+        if base==-1: #tumpuan kaki kiri
+            resCOM=COM(robot,dxl,'ki',readAll_leg='base')
+            pttrn["comXinit"]=resCOM[0]
+            res=forward(robot,dxl,'ki')
+            fwdDef["x"]=res[0]
+            print("comXInit:",pttrn["comXinit"]) #pattern nya menginisialisasi com sekarang untuk langkah selanjutnya
+           
+        elif base==1: #tumpuan kaki kanan
+            resCOM=COM(robot,dxl,'ka',readAll_leg='base')
+            pttrn["comXinit"]=resCOM[0]
+            res=forward(robot,dxl,'ka')
+            fwdDef["x"]=res[0]
+            print("comXInit:",pttrn["comXinit"])
+            # print("fwd last",res)
+
+        state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+        state1Pitch=arctan(comNow["x"]/comNow["z"])
+        controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+        firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+        firstStep=0 # bukan awal langkah lagi      
+        n+=1
+        tp+=tsup*1000
+        if n==(len(xGoal))-1:
+            # lastStep=1 
+            print("yuhu everybody") 
+
+        if n>(len(xGoal))-1:
+            break
+
+if base==-(-1): #base terakhir sebelum switch kaki
+    COM(robot,dxl,'ki',readAll_leg='base')
+elif base==-(1):
+    COM(robot,dxl,'ka',readAll_leg='base')
+
+allCOMx.append(comNow["x"])
+allCOMy.append(comNow["y"])
+allCOMz.append(comNow["z"])
+
+QSave.append(Q[0,0])
+QSave.append(Q[1,1])
+QSave.append(Q[2,2])
+QSave.append(Q[3,3])
+KSave.append(K[0,0])
+KSave.append(K[0,1])
+KSave.append(K[1,2])
+KSave.append(K[1,3])
+
+###                 -------------------------------data control LQR (com)--------------------------------
+#masukin semua data ke excel
+df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+filename="comRead_vs_refCOM-coba"
+loc='./src/program/data/%s.xlsx' % (filename)
+df.to_excel(loc, index=True)
+print("data diinput ke excel bernama : %s.xlsx" % filename)
+
+# print("Q",Q)
+print("K",K)
+
+wb=load_workbook(loc)
+sh=wb.worksheets[0]
+
+for i in range(len(QSave)):
+    sh.cell(row=i+1,column=9,value=QSave[i])
+
+for i in range(len(KSave)):
+    sh.cell(row=i+1,column=10,value=KSave[i])
+
+wb.save(loc)
+
+#------------------------------------plot com----------------------------------
+fig, axs = plt.subplots(2)
+fig.tight_layout(pad=2.0)
+
+#--------jika ingin grafik dalam bentuk com-----------
+axs[0].set_title('sumbu X',loc="left")
+axs[0].plot(allTime,allPttrnXt,"g",label='COM Referensi')
+axs[0].plot(allTime,allCOMx,"r",label="COM Dibaca")
+axs[0].legend(loc="upper left")
+axs[0].grid()
+axs[0].set_xlabel("time (ms)")
+axs[0].set_ylabel("COM X (mm)")
+
+axs[1].set_title('sumbu Y',loc="left")
+axs[1].plot(allTime,allPttrnYt,"g",label='COM Referensi')
+axs[1].plot(allTime,allCOMy,"r",label="COM Dibaca")
+axs[1].legend(loc="upper left")
+axs[1].grid()
+axs[1].set_xlabel("time (ms)")
+axs[1].set_ylabel("COM Y (mm)")
+#--------------------------------------------------------
+
+plt.savefig('./src/program/data/data plot com vs ref com.png')
 # ##======================================================================
 
 #==========================ambil data uji kemiringan robot (pitch)=========================
@@ -971,128 +1138,128 @@ while 1:
 
 
 # # ##================================uji translasi pitch ===============================
-allPttrnXt=[]
-allPttrnYt=[]
-allPttrnZt=[]
-allCOMx=[]
-allCOMy=[]
-allCOMz=[]
-allTime=[]
-QSave=["Q"]
-KSave=["K"]
+# allPttrnXt=[]
+# allPttrnYt=[]
+# allPttrnZt=[]
+# allCOMx=[]
+# allCOMy=[]
+# allCOMz=[]
+# allTime=[]
+# QSave=["Q"]
+# KSave=["K"]
 
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
-robot.syncWrite()
-wait(1.2)
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# robot.syncWrite()
+# wait(1.2)
 
-t16def=dxl[15].prevGoalDegree
-t15def=dxl[14].prevGoalDegree
-t12def=dxl[11].prevGoalDegree
-t11def=dxl[10].prevGoalDegree
+# t16def=dxl[15].prevGoalDegree
+# t15def=dxl[14].prevGoalDegree
+# t12def=dxl[11].prevGoalDegree
+# t11def=dxl[10].prevGoalDegree
 
-resCOM=COM(robot,dxl,'ki')
-# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
-comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
-print("comDef",comDef)
-wait(0.1)
+# resCOM=COM(robot,dxl,'ki')
+# # resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
 
-tawal=-6 #-7
-dxl[15].moveSync(t16def+tawal,1) #servo 16
-dxl[14].moveSync(t15def-tawal,1) #servo 15
-dxl[11].moveSync(t12def-tawal,1) #servo 12
-dxl[10].moveSync(t11def+tawal,1) #servo 11
-robot.syncWrite()
-wait(1.5)
-
-# dxl[15].moveSync(t16def+tawal,1,dxl[15].prevGoal,read=0) #servo 16
-# dxl[14].moveSync(t15def-tawal,1,dxl[14].prevGoal,read=0) #servo 15
-# dxl[11].moveSync(t12def-tawal,1,dxl[11].prevGoal,read=0) #servo 12
-# dxl[10].moveSync(t11def+tawal,1,dxl[10].prevGoal,read=0) #servo 11
+# tawal=-6 #-7
+# dxl[15].moveSync(t16def+tawal,1) #servo 16
+# dxl[14].moveSync(t15def-tawal,1) #servo 15
+# dxl[11].moveSync(t12def-tawal,1) #servo 12
+# dxl[10].moveSync(t11def+tawal,1) #servo 11
 # robot.syncWrite()
 # wait(1.5)
 
-# resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
-resCOM=COM(robot,dxl,'ki')
-state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
-state1Pitch=arctan(comNow["x"]/comNow["z"])
-controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
-wait(0.1)
+# # dxl[15].moveSync(t16def+tawal,1,dxl[15].prevGoal,read=0) #servo 16
+# # dxl[14].moveSync(t15def-tawal,1,dxl[14].prevGoal,read=0) #servo 15
+# # dxl[11].moveSync(t12def-tawal,1,dxl[11].prevGoal,read=0) #servo 12
+# # dxl[10].moveSync(t11def+tawal,1,dxl[10].prevGoal,read=0) #servo 11
+# # robot.syncWrite()
+# # wait(1.5)
 
-tsmp=1 #waktu sampling
-tsup=2 #waktu 
+# # resCOM=COM(robot,dxl,'ki',readAll_leg='virtual')
+# resCOM=COM(robot,dxl,'ki')
+# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+# state1Pitch=arctan(comNow["x"]/comNow["z"])
+# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+# wait(0.1)
 
-Q,K=tuningLQRdiskrit('translation pitch')
-pttrn["Xt"]=comDef["x"]
-pttrn["Zt"]=comDef["zt"]
-base='ki'
+# tsmp=1 #waktu sampling
+# tsup=2 #waktu 
 
-firstMicros=micros()
-while(1):
+# Q,K=tuningLQRdiskrit('translation pitch')
+# pttrn["Xt"]=comDef["x"]
+# pttrn["Zt"]=comDef["zt"]
+# base='ki'
+
+# firstMicros=micros()
+# while(1):
     
-    print("ref comX",pttrn["Xt"])
-    # t1=time.time()
-    currentMicros=micros()
-    t=currentMicros-firstMicros
-    # print("waktu",t)
+#     print("ref comX",pttrn["Xt"])
+#     # t1=time.time()
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+#     # print("waktu",t)
 
-    t1=time.time()
-    cntTransPitch(robot,dxl,base,K,t)
-    robot.syncWrite()
-    # wait(0.5)
-    # cntTransPitch(robot,dxl,base,K,t,condition='normal')
+#     t1=time.time()
+#     cntTransPitch(robot,dxl,base,K,t)
+#     robot.syncWrite()
+#     # wait(0.5)
+#     # cntTransPitch(robot,dxl,base,K,t,condition='normal')
 
-    allPttrnXt.append(pttrn["Xt"])
-    allPttrnYt.append(pttrn["Yt"])
-    allPttrnZt.append(pttrn["Zt"])
-    allCOMx.append(comNow["x"])
-    allCOMy.append(comNow["y"])
-    allCOMz.append(comNow["z"])
-    allTime.append(t/1000)
-    t2=time.time()
-    print("tot",t2-t1)
-    wait(0.05)
+#     allPttrnXt.append(pttrn["Xt"])
+#     allPttrnYt.append(pttrn["Yt"])
+#     allPttrnZt.append(pttrn["Zt"])
+#     allCOMx.append(comNow["x"])
+#     allCOMy.append(comNow["y"])
+#     allCOMz.append(comNow["z"])
+#     allTime.append(t/1000)
+#     t2=time.time()
+#     print("tot",t2-t1)
+#     wait(0.05)
 
-    if t/1000000>=tsup:
-        break
+#     if t/1000000>=tsup:
+#         break
 
-QSave.append(Q[0,0])
-QSave.append(Q[1,1])
-QSave.append(Q[2,2])
-QSave.append(Q[3,3])
-KSave.append(K[0,0])
-KSave.append(K[0,1])
-KSave.append(K[1,2])
-KSave.append(K[1,3])
+# QSave.append(Q[0,0])
+# QSave.append(Q[1,1])
+# QSave.append(Q[2,2])
+# QSave.append(Q[3,3])
+# KSave.append(K[0,0])
+# KSave.append(K[0,1])
+# KSave.append(K[1,2])
+# KSave.append(K[1,3])
 
-#masukin semua data ke excel
-df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
-filename="tuning COM translasi pitch"
-loc='./src/program/data/%s.xlsx' % (filename)
-df.to_excel(loc, index=True)
-print("data diinput ke excel bernama : %s.xlsx" % filename)
+# #masukin semua data ke excel
+# df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allPttrnZt,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+# filename="tuning COM translasi pitch"
+# loc='./src/program/data/%s.xlsx' % (filename)
+# df.to_excel(loc, index=True)
+# print("data diinput ke excel bernama : %s.xlsx" % filename)
 
-print("Q",Q)
-print("K",K)
+# print("Q",Q)
+# print("K",K)
 
-plt.plot(allTime,allPttrnXt,"g",label='COM Referensi')
-plt.plot(allTime,allCOMx,"r",label='COM Dibaca')
-plt.grid()
-plt.xlabel("time (ms)")
-plt.ylabel("COM X (mm)")
-plt.show()
-plt.savefig('./src/program/data/data translasi pitch.png')
+# plt.plot(allTime,allPttrnXt,"g",label='COM Referensi')
+# plt.plot(allTime,allCOMx,"r",label='COM Dibaca')
+# plt.grid()
+# plt.xlabel("time (ms)")
+# plt.ylabel("COM X (mm)")
+# plt.show()
+# plt.savefig('./src/program/data/data translasi pitch.png')
 
-wb=load_workbook(loc)
-sh=wb.worksheets[0]
+# wb=load_workbook(loc)
+# sh=wb.worksheets[0]
 
-for i in range(len(QSave)):
-    sh.cell(row=i+1,column=9,value=QSave[i])
+# for i in range(len(QSave)):
+#     sh.cell(row=i+1,column=9,value=QSave[i])
 
-for i in range(len(KSave)):
-    sh.cell(row=i+1,column=10,value=KSave[i])
+# for i in range(len(KSave)):
+#     sh.cell(row=i+1,column=10,value=KSave[i])
 
-wb.save(loc)
+# wb.save(loc)
 
 # # ==============================================
 ##------------------------------translasi roll kaki 1--------
@@ -1139,8 +1306,8 @@ wb.save(loc)
 # tsup=2 #waktu 2
 
 # Q,K=tuningLQRdiskrit('translation roll 1 kaki')
-# pttrn["Yt"]=14.514
-# pttrn["Zt"]=198.868
+# pttrn["Yt"]=15.482
+# pttrn["Zt"]=198.824
 # base='ki'
 
 # firstMicros=micros()
@@ -1156,7 +1323,7 @@ wb.save(loc)
 #     cntTransRoll(robot,dxl,base,K,t)
 #     # cntTransRoll(robot,dxl,base,K,t,condition='virtual')
 #     invers(robot,dxl,'ka',0,0,17,1)
-#     dxl[9].moveSync(11,1) #10
+#     dxl[9].moveSync(10,1) #10
 #     robot.syncWrite()
 
 #     allPttrnXt.append(pttrn["Xt"])
@@ -1202,7 +1369,7 @@ wb.save(loc)
 
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,17,1)
-# dxl[17].moveSync(-17,1) #19
+# dxl[17].moveSync(-17.25,1) #19
 # dxl[8].moveSync(-14,1)  #14
 # dxl[9].moveSync(10,1)
 # dxl[16].moveSync(-15,1) #15
@@ -1313,3 +1480,30 @@ wb.save(loc)
 # plt.show()
 # plt.savefig('./src/program/data/data translasi pitch 1 kaki.png')
 # # # ==============================================
+
+# ##==============================set referensi pitch imu===========================
+# while(1):
+#     print("----set referensi pitch imu---- /enter /esc")
+#     if getch() == chr(0x1b):
+#         break
+    
+#     getMpu()
+#     imuData["refPitch"]=round(imuData["pitch"])
+#     print("referensi pitch:",imuData["refPitch"])
+# ##==================================================================================
+
+# #------------coba feedback imu pitch----------------
+# while(1):
+#     getMpu()
+#     errorPitch=round(imuData["pitch"])-imuData["refPitch"]
+#     print("error Pitch",errorPitch)
+
+#     delta15=dxl[14].prevGoalDegree-errorPitch
+#     delta16=dxl[15].prevGoalDegree+errorPitch
+#     print("delta15",delta15)
+#     print("delta16",delta16)
+#     dxl[14].moveSync(delta15,0.3,dxl[14].prevGoal,read=0) 
+#     dxl[15].moveSync(delta16,0.3,dxl[15].prevGoal,read=0) 
+#     robot.syncWrite()
+#     wait(0.3)
+   

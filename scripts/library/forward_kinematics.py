@@ -54,7 +54,7 @@ def forward(base,angle,nFrame):
                     [sin(t[i]),cos(t[i])*cos(alp[i]),-cos(t[i])*sin(alp[i]),a[i]*sin(t[i])],
                     [0,sin(alp[i]),cos(alp[i]),d[i]],
                     [0,0,0,1]])
-        # print("trans",i,":",trans[i])
+        print("trans",i,":",trans[i])
         Tot=dot(Tot,trans[i])
 
     return Tot

@@ -24,7 +24,7 @@ fwdDef={"x":0}
 comNow={"x":0,"y":0,"z":0}
 comXPolaPeriod=[0,0,0,0,0]
 comYPolaPeriod=[0,0,0,0,0]
-sH=3
+
 
 def getMagneto(dataFlag='all'):
 
@@ -247,6 +247,138 @@ def invers_walk2(robot,dxl,base,x,y,z,times,vRoll,vPitch,condition='walk1'):
             dxl[14].moveSync(invPttrn["t15"],vPitch,dxl[14].prevGoal,time_type='omega',read=0)
             dxl[16].moveSync(invPttrn["t17"],vRoll,dxl[16].prevGoal,time_type='omega',read=0)
     
+def invers_walkrey(robot,dxl,base,x,y,z,times,vRoll,vPitch):
+
+    IK_w=rospy.ServiceProxy('compute_invers_walk',ComputeInversWalk)
+    req=ComputeInversWalkRequest()
+    
+    req.base.data=base
+    req.coordinatX.data=x
+    req.coordinatY.data=y
+    req.coordinatZ.data=z
+    if base=='ki':
+        req.length_la.data=invPttrn["la_Ki"]
+        req.t_EngkleBaseRoll.data=invPttrn["t18"]
+        req.t_EngkleBasePitch.data=-invPttrn["t16"]
+    elif base=='ka':
+        req.length_la.data=invPttrn["la_Ka"]
+        req.t_EngkleBaseRoll.data=invPttrn["t17"]
+        req.t_EngkleBasePitch.data=invPttrn["t15"]
+    
+    resp=IK_w.call(req)
+    angle = [float(x) for x in resp.angleServo.data.split(",")]
+    t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5],angle[6],angle[7],angle[8],angle[9],angle[10],angle[11]
+
+    #for swing planning
+    # swngPlan["xbase"],swngPlan["xswing"]=resp.xbase.data,resp.xswing.data
+    # print("xbase,xswing",swngPlan["xbase"],swngPlan["xswing"])
+
+    if base=='ki':
+        # dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+        dxl[9].moveSync(invPttrn["t10"],1.5,dxl[9].prevGoal,read=0)
+        dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+        dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+        dxl[15].moveSync(invPttrn["t16"],vPitch,dxl[15].prevGoal,time_type='omega',read=0)
+        dxl[17].moveSync(invPttrn["t18"],vRoll,dxl[17].prevGoal,time_type='omega',read=0)
+
+        # dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+        dxl[8].moveSync(invPttrn["t9"],times,dxl[8].prevGoal,read=0)
+        dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+        dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+        dxl[14].moveSync(t15,times,dxl[14].prevGoal,read=0)
+        dxl[16].moveSync(invPttrn["t17"],times,dxl[16].prevGoal,read=0)
+    elif base=='ka':
+        #send servo left leg
+        # dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+        dxl[9].moveSync(invPttrn["t10"],times,dxl[9].prevGoal,read=0)
+        dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+        dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+        dxl[15].moveSync(t16,times,dxl[15].prevGoal,read=0)
+        dxl[17].moveSync(invPttrn["t18"],times,dxl[17].prevGoal,read=0)
+
+        #send servo right leg
+        # dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+        dxl[8].moveSync(invPttrn["t9"],1.5,dxl[8].prevGoal,read=0)
+        dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+        dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+        dxl[14].moveSync(invPttrn["t15"],vPitch,dxl[14].prevGoal,time_type='omega',read=0)
+        dxl[16].moveSync(invPttrn["t17"],vRoll,dxl[16].prevGoal,time_type='omega',read=0)
+ 
+def invers_walk5(robot,dxl,base,x,y,z,times,vRoll,vPitch,condition='walk1'):
+
+    IK_w=rospy.ServiceProxy('compute_invers_walk',ComputeInversWalk0)
+    req=ComputeInversWalk0Request()
+    
+    req.base.data=base
+    req.coordinatX.data=x
+    req.coordinatY.data=y
+    req.coordinatZ.data=z
+    if base=='ki':
+        req.length_la.data=invPttrn["la_Ki"]
+        req.t_EngkleBaseRoll.data=invPttrn["t18"]
+        req.t_EngkleBasePitch.data=-invPttrn["t16"]
+    elif base=='ka':
+        req.length_la.data=invPttrn["la_Ka"]
+        req.t_EngkleBaseRoll.data=invPttrn["t17"]
+        req.t_EngkleBasePitch.data=invPttrn["t15"]
+    
+    resp=IK_w.call(req)
+    angle = [float(x) for x in resp.angleServo.data.split(",")]
+    t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18=angle[0],angle[1],angle[2],angle[3],angle[4],angle[5],angle[6],angle[7],angle[8],angle[9],angle[10],angle[11]
+
+    #for swing planning
+    swngPlan["xbase"],swngPlan["xswing"]=resp.xbase.data,resp.xswing.data
+    # print("xbase,xswing",swngPlan["xbase"],swngPlan["xswing"])
+
+    if condition=='walk1':
+        #send servo left leg
+        dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+        dxl[9].moveSync(t10,times,dxl[9].prevGoal,read=0)
+        dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+        dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+        dxl[15].moveSync(t16,times,dxl[15].prevGoal,read=0)
+        dxl[17].moveSync(t18,times,dxl[17].prevGoal,read=0)
+
+        #send servo right leg
+        dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+        dxl[8].moveSync(t9,times,dxl[8].prevGoal,read=0)
+        dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+        dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+        dxl[14].moveSync(t15,times,dxl[14].prevGoal,read=0)
+        dxl[16].moveSync(t17,times,dxl[16].prevGoal,read=0)
+
+    elif condition=='walk2':
+        if base=='ki':
+            dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+            dxl[9].moveSync(invPttrn["t10"],1.5,dxl[9].prevGoal,read=0)
+            dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+            dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+            dxl[15].moveSync(invPttrn["t16"],vPitch,dxl[15].prevGoal,time_type='omega',read=0)
+            dxl[17].moveSync(invPttrn["t18"],vRoll,dxl[17].prevGoal,time_type='omega',read=0)
+
+            dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+            dxl[8].moveSync(invPttrn["t9"],times,dxl[8].prevGoal,read=0)
+            dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+            dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+            dxl[14].moveSync(t15,times,dxl[14].prevGoal,read=0)
+            dxl[16].moveSync(invPttrn["t17"],times,dxl[16].prevGoal,read=0)
+        elif base=='ka':
+            #send servo left leg
+            dxl[6].moveSync(t7,times,dxl[6].prevGoal,read=0)
+            dxl[9].moveSync(invPttrn["t10"],times,dxl[9].prevGoal,read=0)
+            dxl[11].moveSync(t12,times,dxl[11].prevGoal,read=0)
+            dxl[13].moveSync(t14,times,dxl[13].prevGoal,read=0)
+            dxl[15].moveSync(t16,times,dxl[15].prevGoal,read=0)
+            dxl[17].moveSync(invPttrn["t18"],times,dxl[17].prevGoal,read=0)
+
+            #send servo right leg
+            dxl[7].moveSync(t8,times,dxl[7].prevGoal,read=0)
+            dxl[8].moveSync(invPttrn["t9"],1.5,dxl[8].prevGoal,read=0)
+            dxl[10].moveSync(t11,times,dxl[10].prevGoal,read=0)
+            dxl[12].moveSync(t13,times,dxl[12].prevGoal,read=0)
+            dxl[14].moveSync(invPttrn["t15"],vPitch,dxl[14].prevGoal,time_type='omega',read=0)
+            dxl[16].moveSync(invPttrn["t17"],vRoll,dxl[16].prevGoal,time_type='omega',read=0)    
+
 def forward(robot,dxl,base,nFrame=27,readAll_leg='yes'):
     if readAll_leg=='yes':
         angle=robot.readLeg()
@@ -738,7 +870,7 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
             COM(robot,dxl,'ka',readAll_leg='virtual')
 
     print("t:",t)
-
+    sH=2
     #periode 1
     if t<=(tsup/4)+0.1:
         if firstStep==1: #jika awal melangkah
@@ -851,6 +983,206 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
         pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],pttrn["xS"]=Xt,Yt,sfx,sfy,sfz,sfx
         print("==================Periode 4=====================")    
         
+    print("base kaki kiri" if base==-1 else "base kaki kanan" )
+    print("Xt=",Xt)
+    print("Yt=",Yt)
+    print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
+    print("sfx=",sfx)
+    print("sfy=",sfy)
+    print("sfz=",sfz)
+    print("================================================")
+
+    # return Xt,Yt,sfx,sfy,sfz
+
+def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
+    
+    t=t/1000000 # ubah t dari microsecond ke second
+    
+    if base==-1: #base kaki kiri
+        yg=-1 #pengali untuk merubah kaki tumpuan
+        if condition=='normal':
+            COM(robot,dxl,'ki',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ki',readAll_leg='virtual')
+    elif base==1: #base kaki kanan
+        yg=1
+        if condition=='normal':
+            COM(robot,dxl,'ka',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ka',readAll_leg='virtual')
+
+    pttrn["Zt"]=comNow["z"]
+
+    print("t:",t)
+
+    #periode 1
+    if t<=(tsup/4)+0.1:
+        if firstStep==1: #jika awal melangkah
+            t1=0
+            t2=tsup/4+0.1
+            y1=-yg*comDef["y"]
+            y2=2
+            Xt=comDef["x"]
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        elif firstStep==0: #jika bukan awal melangkah
+          
+            t1=0
+            t2=tsup/4+0.1
+            x1=pttrn["comXinit"]
+            # x2=comDef["x"]
+            
+            y1=comNow["y"] #-1 karena ganti kaki tumpuan
+            # y2=yg*(5)
+            if base==-1:
+                y2=-1
+                x2=comDef["x"]
+            elif base==1:
+                y2=0
+                x2=comDef["x"]
+
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+         
+        comXPolaPeriod[1]=Xt
+        comYPolaPeriod[1]=Yt
+        print("==================Periode 1=====================")
+        
+    #periode 2
+    elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
+        
+        t1=(tsup/4)+0.1
+        t2=(tsup/2)+0.1
+        y1=comYPolaPeriod[1]
+        if firstStep==1:
+            y2=2
+            # Xt=comDef["x"]
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            x2=(comDef["x"]+((xGoal*10/2)+comDef["x"]))/2
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        else:
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            # Xt=comDef["x"]
+            
+            if base==-1:
+                y2=-1
+                x2=comDef["x"]
+            elif base==1:
+                y2=0
+                x2=comDef["x"]
+            
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+        comXPolaPeriod[2]=Xt
+        comYPolaPeriod[2]=Yt
+
+        print("==================Periode 2=====================")
+    
+    #periode 3
+    elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
+        t1=(tsup/2)+0.1
+        t2=(3*tsup/4)+0.15
+
+        x1=comXPolaPeriod[2]
+        y1=comYPolaPeriod[2]
+        if firstStep==1:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            # x2=(xGoal*10/2)+(comDef["x"])
+            y2=2
+        else:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            
+            if base==-1:
+                y2=-1
+            elif base==1:
+                y2=0
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[3]=Xt
+        comYPolaPeriod[3]=Yt
+        
+        print("==================Periode 3=====================")
+
+    # #periode 4
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.2):
+        
+        #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
+        if lastStep==0:
+            
+            t1=(3*tsup/4)+0.15
+            t2=(tsup)+0.2
+            x1=comXPolaPeriod[3]
+            
+            y1=comYPolaPeriod[3]
+
+            if firstStep==1:
+                if base==-1:
+                    y2=-yg*comDef["y"]
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-5
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            elif firstStep==0:
+                if base==-1:
+                    y2=-yg*comDef["y"]
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-5
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            # y2=-yg*comDef["y"]
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        print("==================Periode 4=====================")
+
+
+    #-----------pattern swing------------------------
+    sH=2.5#tinggi maksimum langkah
+
+    if t<=(tsup/4):
+        sfx=(fwdDef["x"]/10)
+        sfy=0
+        sfz=0
+
+    elif t>(tsup/4):
+        t1=tsup/4
+        t2=tsup
+
+        sfx1=fwdDef["x"]/10 #posisi kaki awal sumbu x (cm)
+        sfx2=xGoal #posisi kaki tujuan
+
+        if t<=(5/8)*tsup: #3/2 dibagi 2, biar lebih mulus
+            tz1=tsup/4
+            tz2=((5/8)*tsup)
+            sfz1=pttrn["sfz"]
+            sfz2=sH
+        elif t>(5/8)*tsup:
+            tz1=((5/8)*tsup)
+            tz2=tsup+0.25
+            sfz1=pttrn["sfz"]
+            sfz2=0
+
+        sfy=0
+        sfx=round(((t-t1)/(t2-t1)*(sfx2-sfx1))+sfx1,3)
+        sfz=round(((t-tz1)/(tz2-tz1)*(sfz2-sfz1))+sfz1,3)
+        if sfz<0:
+            sfz=0
+    #---------------------------------------------------
+
+    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+
+    #for swing planning
+    # swngPlan["sfx"]=pttrn["sfx"]
+
+    
     print("base kaki kiri" if base==-1 else "base kaki kanan" )
     print("Xt=",Xt)
     print("Yt=",Yt)
@@ -1025,7 +1357,7 @@ def Control3(robot,dxl,base,t,K,condition='normal'):
     # print("state1Pitch:",state1Pitch)
     # print("state2Pitch:",state2Pitch)
 
-    controlDict["pitchBef"],controlDict["rollBef"]=state1Pitch,state1Roll
+    # controlDict["pitchBef"],controlDict["rollBef"]=state1Pitch,state1Roll
 
     #referensi
     refPitch=arctan(pttrn["Xt"]/comNow["z"])
@@ -1106,6 +1438,104 @@ def Control3(robot,dxl,base,t,K,condition='normal'):
     elif condition=='virtual':
         pass
 
+def Controlrey(robot,dxl,base,t,K,condition='normal'):
+        #Control kendali roll pitch, dan yaw juga
+
+    t=t/1000000 # ubah t dari microsecond ke second
+    tServo=0.1
+    tSmpl=0.1
+
+    m=1.634
+    g=9.80665
+    l=0.19614907857545497
+    ixx=0.092026292
+    iyy=0.087070843
+    bstate1=0.0
+    bstate2=0.0
+
+    #ubah status com ke sudut dan kecepatan sudut
+    state1Roll=arctan(comNow["y"]/comNow["z"]) #sudut
+    state2Roll=(state1Roll-controlDict["rollBef"])/tSmpl #kecepatan sudut
+
+    state1Pitch=arctan(comNow["x"]/comNow["z"]) #sudut
+    state2Pitch=(state1Pitch-controlDict["pitchBef"])/tSmpl #kecepatan sudut
+
+    # print("state1Roll:",state1Roll)
+    print("state1Pitch:",state1Pitch)
+    print("state2Pitch:",state2Pitch)
+
+    controlDict["pitchBef"],controlDict["rollBef"]=state1Pitch,state1Roll
+
+    # #referensi
+    refPitch=arctan(pttrn["Xt"]/comNow["z"])
+    refRoll=arctan(pttrn["Yt"]/comNow["z"])
+    # print("refRoll:",refRoll)
+    # print("refPitch:",refPitch)
+
+    #control parameter
+    uRoll=(K[0,0]*(state1Roll-refRoll))+((K[0,1]*state2Roll))
+    ARoll=degrees((-uRoll+(m*g*l*sin(state1Roll-refRoll)))/iyy)
+
+    uPitch=(K[1,2]*(state1Pitch-refPitch))+((K[1,3]*state2Pitch))
+    APitch=degrees((-uPitch+(m*g*l*sin(state1Pitch-refPitch)))/ixx)
+
+    # print("uPitch:",uPitch)
+    # print("APitch:",APitch)
+    if base==-1: #jika tumpuan kaki kiri
+        
+        deltaRoll=((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2)
+        deltaPitch=((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2)
+
+        print("deltaRoll:",deltaRoll)
+        print("deltaPitch:",deltaPitch)
+
+        #left leg (support)
+        invPttrn["t18"]=dxl[17].prevGoalDegree-deltaRoll
+        invPttrn["t16"]=dxl[15].prevGoalDegree-deltaPitch
+        v18=abs(degrees(state2Roll)+(ARoll*tSmpl))
+        v16=abs(degrees(state2Pitch)+(APitch*tSmpl))
+        invPttrn["t10"]=0 #hip roll
+        #right leg (swing)
+        invPttrn["t17"]=invPttrn["t18"] #base roll
+        invPttrn["t9"]=invPttrn["t18"] #hip roll
+        # print("t9 kirim:",invPttrn["t9"])
+
+        # print("t18roll:",invPttrn["t18"])
+        # print("t16pitch",invPttrn["t16"])
+        # print("v18:",v18)
+        # print("v16:",v16)
+        # print("delta_16_pitch",)
+        invers_walkrey(robot,dxl,'ki',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v18,v16)
+    
+    #------------------------------------------------------------------------------------------
+    elif base==1: #jika tumpuan kaki kanan
+
+        deltaRoll=((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2)
+        deltaPitch=((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2)
+        # print("deltaRoll:",deltaRoll)
+        # print("deltaPitch:",deltaPitch)
+
+        #right leg(support) 
+        invPttrn["t17"]=dxl[16].prevGoalDegree-deltaRoll #base roll
+        invPttrn["t15"]=dxl[14].prevGoalDegree+deltaPitch #base pitch
+        invPttrn["t9"]=0 #hip roll
+        v17=abs(degrees(state2Roll)+(ARoll*tSmpl))
+        v15=abs(degrees(state2Pitch)+(APitch*tSmpl))
+        #left leg (swing)
+        invPttrn["t18"]=invPttrn["t17"] #base roll
+        invPttrn["t10"]=invPttrn["t17"] #hip roll
+
+        # print("t17:",invPttrn["t17"])
+        # print("t15:",invPttrn["t15"])
+
+        # print("t10s kirim:",invPttrn["t10"])
+        invers_walkrey(robot,dxl,'ka',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v17,v15)
+           
+    # if condition=='normal':
+    #     robot.syncWrite() 
+    # elif condition=='virtual':
+    #     pass
+
 def tuningLQR(condition):
     m=1.725 #(kg)
     g=9.80665 #m/s^2
@@ -1174,10 +1604,10 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[7000,0,0,0], #roll
-                    [0,0.1,0,0], 
-                    [0,0,6000,0], #pitch
-                    [0,0,0,0.1]])
+        Q = np.array([[7000,0,0,0], #roll 7000
+                    [0,0.01567,0,0], 
+                    [0,0,6000,0], #pitch 6000
+                    [0,0,0,0.1567]])
 
     elif condition=='walkc':
         Q = np.array([[200,0,0,0], #roll
@@ -1192,16 +1622,16 @@ def tuningLQRdiskrit(condition):
                     [0,0,0,1]])
 
     elif condition=='translation roll 1 kaki':
-        Q = np.array([[1700,0,0,0],
-                    [0,0.001,0,0],
+        Q = np.array([[230.964476,0,0,0],
+                    [0,0.00085357467561,0,0],
                     [0,0,1,0],
                     [0,0,0,1]])
     
     elif condition=='translation pitch':
         Q = np.array([[1,0,0,0],
                     [0,1,0,0],
-                    [0,0,33.998667,0],
-                    [0,0,0,0.3256]])
+                    [0,0,57.99946458667,0],
+                    [0,0,0,0.3859]])
 
     elif condition=='translation pitch 1 kaki':
         Q = np.array([[1000,0,0,0],
@@ -1210,10 +1640,10 @@ def tuningLQRdiskrit(condition):
                     [0,0,0,1]])
     
     elif condition=='coba':
-        Q = np.array([[1,0,0,0],
-                    [0,1,0,0],
-                    [0,0,1,0],
-                    [0,0,0,1]])       
+        Q = np.array([[5000,0,0,0],
+                    [0,0.9,0,0],
+                    [0,0,1800,0],
+                    [0,0,0,0.1]])       
 
     R = np.array([[1,0],[0,1]])
 

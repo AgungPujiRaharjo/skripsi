@@ -34,7 +34,7 @@ def invers(base,x,y,z): # x,y,z dalam cm ; times detik
         tm=arccos(tm)*180/pi
         t14=180-tm #sudut theta 14
 
-        t14=t14-3.7996
+        t14=t14-3.7996  #menyesuaikan sudutnya dengan mengurangi 4 derajat
 
         tn=((la**(2))+(l3**(2))-(l2**(2)))/(2*la*l3)
         tn=arccos(tn)*180/pi

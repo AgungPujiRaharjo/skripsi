@@ -56,7 +56,7 @@ def forwardLeg(base,angleLeg,nFrame=27):
         alp[i]=float(alp[i])/180*pi
 
     trans=[0. for ka in range(nFrame)]
-    Tot=eye(4)
+    Tot=eye(4) #matriks identitas
 
     #perkalian matriks ke n frame
     for i in range(nFrame):
@@ -90,7 +90,7 @@ def Lok_Trans(base,nFrame,nLok):
                 [lokZ[nLok]],
                 [1]])
     
-    MultLokTrans=dot(matriks_fwd[nFrame],lokal)
+    MultLokTrans=dot(matriks_fwd[nFrame],lokal) 
 
     return MultLokTrans
 
