@@ -1193,7 +1193,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
         t2=(tsup/2)+0.1
         y1=comYPolaPeriod[1]
         if firstStep==1:
-            y2=yg*0-2 #
+            y2=yg*0+1 #
             # Xt=comDef["x"]
             x1=comXPolaPeriod[1]
             # x2=comDef["x"]
@@ -1205,7 +1205,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
             # Xt=comDef["x"]
             
             if base==-1:
-                y2=-1
+                y2=-2
                 x2=comDef["x"]
             elif base==1:
                 y2=0
@@ -1618,7 +1618,7 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[1400,0,0,0], #roll kiri
+        Q = np.array([[1000,0,0,0], #roll kiri
                     [0,1,0,0], 
                     [0,0,600,0], #pitch kiri
                     [0,0,0,1]])

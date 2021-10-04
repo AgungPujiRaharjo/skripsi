@@ -71,6 +71,9 @@ TORQUE_DISABLE              = 0                 # Value for disabling the torque
 
 
 ##-----------------------Posisi default-----------------------------------
+hip = 0
+eng = 0
+
 dxl.append(servo.Servo(205,1,portHandler,packetHandler)) 
 dxl.append(servo.Servo(818,2,portHandler,packetHandler)) 
 dxl.append(servo.Servo(279,3,portHandler,packetHandler))
@@ -81,12 +84,12 @@ dxl.append(servo.Servo(358,7,portHandler,packetHandler))
 dxl.append(servo.Servo(658,8,portHandler,packetHandler)) #666
 dxl.append(servo.Servo(516,9,portHandler,packetHandler)) 
 dxl.append(servo.Servo(516,10,portHandler,packetHandler))
-dxl.append(servo.Servo(508,11,portHandler,packetHandler)) 
-dxl.append(servo.Servo(508,12,portHandler,packetHandler)) 
+dxl.append(servo.Servo(508-hip,11,portHandler,packetHandler)) 
+dxl.append(servo.Servo(508+hip,12,portHandler,packetHandler)) 
 dxl.append(servo.Servo(513,13,portHandler,packetHandler)) 
 dxl.append(servo.Servo(513,14,portHandler,packetHandler)) 
-dxl.append(servo.Servo(518,15,portHandler,packetHandler))  #515
-dxl.append(servo.Servo(502,16,portHandler,packetHandler)) #505
+dxl.append(servo.Servo(518+eng,15,portHandler,packetHandler))  #515
+dxl.append(servo.Servo(502-eng,16,portHandler,packetHandler)) #505
 dxl.append(servo.Servo(516,17,portHandler,packetHandler)) 
 dxl.append(servo.Servo(516,18,portHandler,packetHandler))
 
@@ -277,7 +280,7 @@ while 1:
 # wb.save(loc)
 # ##              -----------------------------------------------------------------------------------------
 
-##=============================coba pola dengan kendali LQR==============
+##=============================coba pola dengan kendali LQR dipake==============
 invers(robot,dxl,'ki',0,0,20,1)
 invers(robot,dxl,'ka',0,0,20,1)
 robot.syncWrite()
@@ -289,7 +292,7 @@ print("comDef",comDef)
 wait(0.1)
 # comDef["x"]=comDef["x"]+3
 
-comDefKi=comDef["x"]+3
+comDefKi=comDef["x"]+3.5
 comDefKa=comDef["x"]+4 #+5 com saat itu posisi nya kurang pas
 
 state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
@@ -302,7 +305,7 @@ while(1):
         break
 
 firstStep=1
-xGoal=[2,2,2,2,2,2,2,2,2,2] #5 langkah
+xGoal=[3,3,3,3] #,2,2,2,2,2,2,2,2] #5 langkah
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
@@ -377,7 +380,7 @@ while(1):
     if t/1000000>=tsup +0.08: 
         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
         base=base*(-1) # switch kaki tumpu
-        wait(0.3)
+        wait(0.8)
 
         #forward
         if base==-1: #tumpuan kaki kiri
@@ -473,7 +476,7 @@ axs[1].set_ylabel("COM Y (mm)")
 #--------------------------------------------------------
 
 plt.savefig('./src/program/data/data plot com vs ref com.png')
-# ##======================================================================
+# # ##======================================================================
 
 # # -----------------------------------coba pola dengan LQR---------------------------------
 # invers(robot,dxl,'ki',0,0,20,1)
