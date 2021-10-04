@@ -853,7 +853,7 @@ def walkUpdate2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
 
     # return Xt,Yt,sfx,sfy,sfz
 
-def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
+def walkUpdateove(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
     
     if base==-1: #base kaki kiri
@@ -994,6 +994,144 @@ def walkUpdate3(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal
 
     # return Xt,Yt,sfx,sfy,sfz
 
+def walkUpdateove2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
+    t=t/1000000 # ubah t dari microsecond ke second
+    
+    if base==-1: #base kaki kiri
+        yg=-1 #pengali untuk merubah kaki tumpuan
+        if condition=='normal':
+            COM(robot,dxl,'ki',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ki',readAll_leg='virtual')
+    elif base==1: #base kaki kanan
+        yg=1
+        if condition=='normal':
+            COM(robot,dxl,'ka',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ka',readAll_leg='virtual')
+
+    pttrn["Zt"]=comNow["z"]
+    print("t:",t)
+
+    #periode 1
+    if t<=(tsup/4)+0.1:
+        if firstStep==1: #jika awal melangkah
+            t1=0
+            t2=tsup/4+0.1
+            y1=-yg*comDef["y"]
+            y2=yg*0
+            Xt=comDef["x"]
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            # Zt=comDef["z"]+(t*(17-comDef["z"])/(tsup/4)+0.1)
+        
+        elif firstStep==0: #jika bukan awal melangkah
+            t1=0
+            t2=tsup/4+0.1
+            x1=comNow["x"]
+            x2=comXPolaPeriod[4]*(-1)+10
+            y1=comYPolaPeriod[4]*(-1)
+            y2=yg*0
+
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+         
+        comXPolaPeriod[1]=Xt
+        comYPolaPeriod[1]=Yt
+        print("==================Periode 1=====================")
+        
+    #periode 2
+    elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
+        
+        t1=(tsup/4)+0.1
+        t2=(tsup/2)+0.1
+        y1=comYPolaPeriod[1]
+        y2=yg*0 
+        x1=comXPolaPeriod[1]
+        x2=(xGoal*10/2)+comDef["x"]
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[2]=Xt
+        comYPolaPeriod[2]=Yt
+        print("==================Periode 2=====================")
+    
+    #periode 3
+    elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
+        t1=(tsup/2)+0.1
+        t2=(3*tsup/4)+0.15
+        x1=comXPolaPeriod[2]      
+        x2=(xGoal*10/2)+comDef["x"]
+        y1=comYPolaPeriod[2]
+        y2=yg*0 #yg*0 15
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[3]=Xt
+        comYPolaPeriod[3]=Yt
+        print("==================Periode 3=====================")
+
+    # #periode 4
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.1):
+        t1=(3*tsup/4)+0.15
+        t2=(tsup)+0.1
+        x1=comXPolaPeriod[3]
+        x2=(xGoal*10/2)+comDef["x"]+20
+        y1=comYPolaPeriod[3]
+        y2=(-yg*comDef["y"])
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        print("==================Periode 4=====================")    
+        
+
+    # return Xt,Yt,sfx,sfy,sfz
+    #-----------pattern swing------------------------
+    sH=2.5#tinggi maksimum langkah
+
+    if t<=(tsup/4):
+        sfx=(fwdDef["x"]/10)
+        sfy=0
+        sfz=0
+
+    elif t>(tsup/4):
+        t1=tsup/4
+        t2=tsup
+
+        sfx1=fwdDef["x"]/10 #posisi kaki awal sumbu x (cm)
+        sfx2=xGoal #posisi kaki tujuan
+
+        if t<=(5/8)*tsup: #3/2 dibagi 2, biar lebih mulus
+            tz1=tsup/4
+            tz2=((5/8)*tsup)
+            sfz1=pttrn["sfz"]
+            sfz2=sH
+        elif t>(5/8)*tsup:
+            tz1=((5/8)*tsup)
+            tz2=tsup+0.25
+            sfz1=pttrn["sfz"]
+            sfz2=0
+
+        sfy=0
+        sfx=round(((t-t1)/(t2-t1)*(sfx2-sfx1))+sfx1,3)
+        sfz=round(((t-tz1)/(tz2-tz1)*(sfz2-sfz1))+sfz1,3)
+        if sfz<0:
+            sfz=0
+
+    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+
+    print("base kaki kiri" if base==-1 else "base kaki kanan" )
+    print("Xt=",Xt)
+    print("Yt=",Yt)
+    print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
+    print("sfx=",sfx)
+    print("sfy=",sfy)
+    print("sfz=",sfz)
+    print("================================================")
+
+    # return Xt,Yt,sfx,sfy,sfz
+
 def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
     
     t=t/1000000 # ubah t dari microsecond ke second
@@ -1021,7 +1159,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
             t1=0
             t2=tsup/4+0.1
             y1=-yg*comDef["y"]
-            y2=2
+            y2=yg*0 #
             Xt=comDef["x"]
             Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
             
@@ -1033,7 +1171,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
             # x2=comDef["x"]
             
             y1=comNow["y"] #-1 karena ganti kaki tumpuan
-            # y2=yg*(5)
+            y2=yg*(0)
             if base==-1:
                 y2=-1
                 x2=comDef["x"]
@@ -1055,7 +1193,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
         t2=(tsup/2)+0.1
         y1=comYPolaPeriod[1]
         if firstStep==1:
-            y2=2
+            y2=yg*0-2 #
             # Xt=comDef["x"]
             x1=comXPolaPeriod[1]
             # x2=comDef["x"]
@@ -1091,7 +1229,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
         if firstStep==1:
             x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
             # x2=(xGoal*10/2)+(comDef["x"])
-            y2=2
+            y2=yg*0 #
         else:
             x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
             
@@ -1145,7 +1283,7 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
 
 
     #-----------pattern swing------------------------
-    sH=2.5#tinggi maksimum langkah
+    sH=2#tinggi maksimum langkah
 
     if t<=(tsup/4):
         sfx=(fwdDef["x"]/10)
@@ -1181,7 +1319,6 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
 
     #for swing planning
     # swngPlan["sfx"]=pttrn["sfx"]
-
     
     print("base kaki kiri" if base==-1 else "base kaki kanan" )
     print("Xt=",Xt)
@@ -1247,87 +1384,8 @@ def Control(robot,dxl,base,t,condition='normal'):
     elif condition=='virtual':
         print("sync virtual")
 
-def Control2(robot,dxl,base,t,condition='normal'):
-    t=t/1000000 # ubah t dari microsecond ke second
-    tServo=0.1
-    tSmpl=0.1
-
-    m=1.725
-    g=9.80665
-    l=0.19614907857545497
-    ixx=0.092026292
-    iyy=0.087070843
-
-    #array K full state feedback
-    K=array([[1,1,0,0],
-            [0,0,1,1]])
-
-    #status com
-    state1Pitch=arctan(comNow["x"]/comNow["z"])
-    state2Pitch=(state1Pitch-controlDict["pitchBef"])/tSmpl
-
-    state1Roll=arctan(comNow["y"]/comNow["z"])
-    state2Roll=(state1Roll-controlDict["rollBef"])/tSmpl
-    # print("state1Pitch:",state1Pitch)
-    # print("state1Roll:",state1Roll)
-    controlDict["pitchBef"],controlDict["rollBef"]=state1Pitch,state1Roll
-
-    #referensi
-    refPitch=arctan(pttrn["Xt"]/comNow["z"])
-    refRoll=arctan(pttrn["Yt"]/comNow["z"])
-    # print("refPitch:",refPitch)
-    # print("refRoll:",refRoll)
-
-    #control parameter
-    uPitch=(K[0,0]*(state1Pitch-refPitch))+((K[0,1]*state2Pitch-0))
-    APitch=degrees((-uPitch+(m*g*l*sin(state1Pitch)))/ixx)
-
-    uRoll=(K[1,2]*(state1Roll-refRoll))+((K[1,3]*state2Roll-0))
-    ARoll=degrees((-uRoll+(m*g*l*sin(state1Roll)))/iyy)
-
-    if base==-1: #jika tumpuan kaki kiri
-
-        #left leg (support)
-        invPttrn["t18"]=dxl[17].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #base roll
-        invPttrn["t16"]=dxl[15].prevGoalDegree+((degrees(state2Pitch))*tSmpl)+(APitch*tSmpl*tSmpl/2) #base pitch
-        v18=degrees(state2Roll)+(ARoll*tSmpl)
-        v16=degrees(state2Pitch)+(APitch*tSmpl)
-        invPttrn["t10"]=0 #hip roll
-        #right leg (swing)
-        invPttrn["t17"]=dxl[16].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #base roll
-        invPttrn["t9"]=dxl[8].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #hip roll
-        # print("t9 kirim:",invPttrn["t9"])
-
-        print("t18:",invPttrn["t18"])
-        print("t16:",invPttrn["t16"])
-
-        invers_walk2(robot,dxl,'ki',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v18,v16,condition='walk2')
-    
-    #------------------------------------------------------------------------------------------
-    elif base==1: #jika tumpuan kaki kanan
-
-        #right leg(support) 
-        invPttrn["t17"]=dxl[16].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #base roll
-        invPttrn["t15"]=dxl[14].prevGoalDegree-((degrees(state2Pitch))*tSmpl)-(APitch*tSmpl*tSmpl/2) #base pitch
-        invPttrn["t9"]=0 #hip roll
-        v17=degrees(state2Roll)+(ARoll*tSmpl)
-        v15=degrees(state2Pitch)+(APitch*tSmpl)
-        #left leg (swing)
-        invPttrn["t18"]=dxl[17].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #base roll
-        invPttrn["t10"]=dxl[9].prevGoalDegree+((degrees(state2Roll))*tSmpl)+(ARoll*tSmpl*tSmpl/2) #hip roll
-
-        print("t17:",invPttrn["t17"])
-        print("t15:",invPttrn["t15"])
-
-        # print("t10 kirim:",invPttrn["t10"])
-        invers_walk2(robot,dxl,'ka',pttrn["sfx"],pttrn["sfy"],pttrn["sfz"],tSmpl,v17,v15,condition='walk2')
-           
-    if condition=='normal':
-        robot.syncWrite() 
-    elif condition=='virtual':
-        print("sync virtual")
 #-----------------------------------------------------------------------------------------
-def Control3(robot,dxl,base,t,K,condition='normal'):
+def Controlove(robot,dxl,base,t,K,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
     tServo=0.1
     tSmpl=0.1
@@ -1439,7 +1497,7 @@ def Control3(robot,dxl,base,t,K,condition='normal'):
         pass
 
 def Controlrey(robot,dxl,base,t,K,condition='normal'):
-        #Control kendali roll pitch, dan yaw juga
+        #Control kendali roll pitch
 
     t=t/1000000 # ubah t dari microsecond ke second
     tServo=0.1
@@ -1536,50 +1594,6 @@ def Controlrey(robot,dxl,base,t,K,condition='normal'):
     # elif condition=='virtual':
     #     pass
 
-def tuningLQR(condition):
-    m=1.725 #(kg)
-    g=9.80665 #m/s^2
-    l=0.19614907857545497 #meter
-    ixx=0.0920262919239
-    iyy=0.087070843434217
-    izz=0.00805112193405
-
-    A = np.array([[0,1,0,0],[m*g*l/ixx, 0, 0, 0],[0, 0, 0, 1],[0 ,0, m*g*l/iyy, 0]])
-    B = np.array([[0 ,0],[1/ixx ,0],[0,0],[0 ,1/iyy]])
-    C = np.array([[1, 0, 0 ,0],[0, 0 ,0 ,0],[0, 0 ,1 ,0],[0, 0 ,0 ,0]])
-    D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
-
-    ###ubah ke discrete dengan kembalian berupa state space method zoh
-    # sys = signal.StateSpace(A, B, C, D)
-    # sysd= sys.to_discrete(0.1)
-
-    # ##ubah ke discrete dengan kembalian berupa A,B,C,D,dt methode zoh
-    # sysd=signal.cont2discrete((A,B,C,D),0.1)
-    # A,B,C,D=sysd[0],sysd[1],sysd[2],sysd[3]
-    if condition=='walk':
-        Q = np.array([[5,0,0,0], #roll
-                    [0,1,0,0], 
-                    [0,0,5,0], #pitch
-                    [0,0,0,1]])
-
-    elif condition=='translation roll':
-        Q = np.array([[1,0,0,0],
-                    [0,1,0,0],
-                    [0,0,1,0],
-                    [0,0,0,1]])
-    
-    elif condition=='translation pitch':
-        Q = np.array([[1,0,0,0],
-                    [0,1,0,0],
-                    [0,0,1,0],
-                    [0,0,0,1]])
-
-    R = np.array([[1,0],[0,1]])
-    K, S, E = ctl.lqr(A, B, Q, R)
-    print("K:",K)
-
-    return Q,K
-
 def tuningLQRdiskrit(condition):
 
     ###dengan baterai
@@ -1604,16 +1618,16 @@ def tuningLQRdiskrit(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='walk':
-        Q = np.array([[7000,0,0,0], #roll 7000
-                    [0,0.01567,0,0], 
-                    [0,0,6000,0], #pitch 6000
-                    [0,0,0,0.1567]])
+        Q = np.array([[1400,0,0,0], #roll kiri
+                    [0,1,0,0], 
+                    [0,0,600,0], #pitch kiri
+                    [0,0,0,1]])
 
-    elif condition=='walkc':
-        Q = np.array([[200,0,0,0], #roll
+    elif condition=='walk2':
+        Q = np.array([[1100,0,0,0], #roll kanan
                     [0,0.1,0,0], 
-                    [0,0,200,0], #pitch
-                    [0,0,0,2]])
+                    [0,0,800,0], #pitch kanan
+                    [0,0,0,1]])
 
     elif condition=='translation roll':
         Q = np.array([[230,0,0,0], #paling better di 230 0.07//// atau 230 0.01 0.001
@@ -1640,10 +1654,10 @@ def tuningLQRdiskrit(condition):
                     [0,0,0,1]])
     
     elif condition=='coba':
-        Q = np.array([[5000,0,0,0],
-                    [0,0.9,0,0],
-                    [0,0,1800,0],
-                    [0,0,0,0.1]])       
+        Q = np.array([[6000,0,0,0], #roll
+                    [0,0.1978,0,0],
+                    [0,0,1000,0], #pitch
+                    [0,0,0,0.5]])       
 
     R = np.array([[1,0],[0,1]])
 
