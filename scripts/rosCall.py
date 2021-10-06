@@ -41,7 +41,9 @@ def getUltrasonic(dataFlag='all'):
     req.what_data.data=dataFlag
     resp=sensor_ultrasonic.call(req)
 
-    return resp.ultrasonic_data.data
+    bla=float(resp.ultrasonic_data.data)
+    bla2 = int(bla)
+    return bla2
 
 def getMpu(dataFlag='all'):
     IMU_mpu=rospy.ServiceProxy('get_mpu_data',GetMpuData)
@@ -1204,10 +1206,10 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
             # x2=comDef["x"]
             # Xt=comDef["x"]
             
-            if base==-1:
-                y2=-2
+            if base==-1: #kiri
+                y2=1
                 x2=comDef["x"]
-            elif base==1:
+            elif base==1: #kanan
                 y2=0
                 x2=comDef["x"]
             
@@ -1233,9 +1235,9 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
         else:
             x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
             
-            if base==-1:
+            if base==-1: #kiri
                 y2=-1
-            elif base==1:
+            elif base==1: #kanan
                 y2=0
         Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
         Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
@@ -1267,7 +1269,206 @@ def walkUpdaterey(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='norm
             
             elif firstStep==0:
                 if base==-1:
+                    y2=-yg*comDef["y"]-2
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-5
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            # y2=-yg*comDef["y"]
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        print("==================Periode 4=====================")
+
+
+    #-----------pattern swing------------------------
+    sH=2#tinggi maksimum langkah
+
+    if t<=(tsup/4):
+        sfx=(fwdDef["x"]/10)
+        sfy=0
+        sfz=0
+
+    elif t>(tsup/4):
+        t1=tsup/4
+        t2=tsup
+
+        sfx1=fwdDef["x"]/10 #posisi kaki awal sumbu x (cm)
+        sfx2=xGoal #posisi kaki tujuan
+
+        if t<=(5/8)*tsup: #3/2 dibagi 2, biar lebih mulus
+            tz1=tsup/4
+            tz2=((5/8)*tsup)
+            sfz1=pttrn["sfz"]
+            sfz2=sH
+        elif t>(5/8)*tsup:
+            tz1=((5/8)*tsup)
+            tz2=tsup+0.25
+            sfz1=pttrn["sfz"]
+            sfz2=0
+
+        sfy=0
+        sfx=round(((t-t1)/(t2-t1)*(sfx2-sfx1))+sfx1,3)
+        sfz=round(((t-tz1)/(tz2-tz1)*(sfz2-sfz1))+sfz1,3)
+        if sfz<0:
+            sfz=0
+    #---------------------------------------------------
+
+    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+
+    #for swing planning
+    # swngPlan["sfx"]=pttrn["sfx"]
+    
+    print("base kaki kiri" if base==-1 else "base kaki kanan" )
+    print("Xt=",Xt)
+    print("Yt=",Yt)
+    print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
+    print("sfx=",sfx)
+    print("sfy=",sfy)
+    print("sfz=",sfz)
+    print("================================================")
+
+    # return Xt,Yt,sfx,sfy,sfz
+
+def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
+    
+    t=t/1000000 # ubah t dari microsecond ke second
+    
+    if base==-1: #base kaki kiri
+        yg=-1 #pengali untuk merubah kaki tumpuan
+        if condition=='normal':
+            COM(robot,dxl,'ki',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ki',readAll_leg='virtual')
+    elif base==1: #base kaki kanan
+        yg=1
+        if condition=='normal':
+            COM(robot,dxl,'ka',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ka',readAll_leg='virtual')
+
+    pttrn["Zt"]=comNow["z"]
+
+    print("t:",t)
+
+    #periode 1
+    if t<=(tsup/4)+0.1:
+        if firstStep==1: #jika awal melangkah
+            t1=0
+            t2=tsup/4+0.1
+            y1=-yg*comDef["y"]
+            y2=yg*0 #
+            Xt=comDef["x"]
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        elif firstStep==0: #jika bukan awal melangkah
+          
+            t1=0
+            t2=tsup/4+0.1
+            x1=pttrn["comXinit"]
+            # x2=comDef["x"]
+            
+            y1=comNow["y"] #-1 karena ganti kaki tumpuan
+            y2=yg*(0)
+            if base==-1:
+                y2=0
+                x2=comDef["x"]
+            elif base==1:
+                y2=0
+                x2=comDef["x"]
+
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+         
+        comXPolaPeriod[1]=Xt
+        comYPolaPeriod[1]=Yt
+        print("==================Periode 1=====================")
+        
+    #periode 2
+    elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
+        
+        t1=(tsup/4)+0.1
+        t2=(tsup/2)+0.1
+        y1=comYPolaPeriod[1]
+        if firstStep==1:
+            y2=yg*0+1 #
+            # Xt=comDef["x"]
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            x2=(comDef["x"]+((xGoal*10/2)+comDef["x"]))/2
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        else:
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            # Xt=comDef["x"]
+            
+            if base==-1: #kiri
+                y2=1
+                x2=comDef["x"]
+            elif base==1: #kanan
+                y2=0
+                x2=comDef["x"]
+            
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+        comXPolaPeriod[2]=Xt
+        comYPolaPeriod[2]=Yt
+
+        print("==================Periode 2=====================")
+    
+    #periode 3
+    elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
+        t1=(tsup/2)+0.1
+        t2=(3*tsup/4)+0.15
+
+        x1=comXPolaPeriod[2]
+        y1=comYPolaPeriod[2]
+        if firstStep==1:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            # x2=(xGoal*10/2)+(comDef["x"])
+            y2=yg*0 #
+        else:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            
+            if base==-1: #kiri
+                y2=1
+            elif base==1: #kanan
+                y2=0
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[3]=Xt
+        comYPolaPeriod[3]=Yt
+        
+        print("==================Periode 3=====================")
+
+    # #periode 4
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.2):
+        
+        #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
+        if lastStep==0:
+            
+            t1=(3*tsup/4)+0.15
+            t2=(tsup)+0.2
+            x1=comXPolaPeriod[3]
+            
+            y1=comYPolaPeriod[3]
+
+            if firstStep==1:
+                if base==-1:
                     y2=-yg*comDef["y"]
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-5
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            elif firstStep==0:
+                if base==-1:
+                    y2=-yg*comDef["y"]-2
                     x2=(xGoal*10/2)+(comDef["x"])+5
                 elif base==1:
                     y2=-yg*comDef["y"]-5
@@ -1594,6 +1795,82 @@ def Controlrey(robot,dxl,base,t,K,condition='normal'):
     # elif condition=='virtual':
     #     pass
 
+def feedback_pitch(robot,dxl,Kimu,base):
+    m=1.634
+    g=9.80665
+    l=0.19614907857545497
+    ixx=0.092026292
+    K_pitch = Kimu[1,2]  
+    K_dot_pitch = Kimu[1,3]
+    # static double ankle_pitch,pitch_prev;
+    # double ref_pitch,pitch_now,error_pitch,error_pitch_dt;
+    # double u_Pitch, alpha_pitch,pos_pitch,vel_pitch;
+    Ts = 0.02 #waktu sampling
+    
+    ref_pitch = 0 
+    pitch_now = radians(imuData["pitch"]) #pembacaan sudut pitch saat ini yang didapat dari imu
+    # std::cout<< "rad pitch : " << imu_pitch << std::endl;
+    error_pitch = pitch_now - ref_pitch #error pembacaan imu
+    error_pitch_dt = error_pitch/Ts 
+    # std::cout<< "error pitch : " << error_pitch << std::endl;
+
+    u_Pitch = ((-K_pitch*(error_pitch-ref_pitch))+(-K_dot_pitch*error_pitch_dt)) #//fullstate feedback
+    alpha_pitch = ((u_Pitch+(m*g*l*sin(error_pitch)))/ixx) #; //alpha pendulum
+    alpha_pitch = degress(alpha_pitch)
+    # std::cout<< "alpha pitch : " << alpha_pitch << std::endl;
+    pos_pitch = (error_pitch_dt*Ts + 0.5*alpha_pitch*Ts*Ts) #; //posisi GMBB
+    vel_pitch = (error_pitch_dt+alpha_pitch*Ts)#; //kecepatan GLBB
+    if base==-1:
+        ankle_pitch=dxl[15].prevGoalDegree-pos_pitch
+        dxl[15].moveSync(ankle_pitch,vel_pitch,dxl[15].prevGoal,time_type='omega',read=0)
+    elif base==1:
+        ankle_pitch=dxl[14].prevGoalDegree-pos_pitch
+        dxl[14].moveSync(ankle_pitch,vel_pitch,dxl[14].prevGoal,time_type='omega',read=0)
+
+    # ankle_pitch = ankle_pitch;
+    # std::cout<< "ankle_pitch : " << ankle_pitch << std::endl;
+    # pitch_prev = pitch_now;
+    # // f = fuzzy(error, error_dt);
+    # return ankle_pitch;
+
+def feedback_roll(robot,dxl,Kimu,base):
+    m=1.634
+    g=9.80665
+    l=0.19614907857545497
+    iyy=0.087070843
+    K_roll = Kimu[0,0]  
+    K_dot_roll = Kimu[0,1]
+    # static double ankle_pitch,pitch_prev;
+    # double ref_pitch,pitch_now,error_pitch,error_pitch_dt;
+    # double u_Pitch, alpha_pitch,pos_pitch,vel_pitch;
+    Ts = 0.02 #waktu sampling
+    
+    ref_roll = 0 
+    roll_now = radians(imuData["roll"]) #pembacaan sudut pitch saat ini yang didapat dari imu
+    # std::cout<< "rad pitch : " << imu_pitch << std::endl;
+    error_roll = roll_now - ref_roll #error pembacaan imu
+    error_roll_dt = error_roll/Ts 
+    # std::cout<< "error pitch : " << error_pitch << std::endl;
+
+    u_roll = ((-K_roll*(error_roll-ref_roll))+(-K_dot_roll*error_roll_dt)) #//fullstate feedback
+    alpha_roll = ((u_roll+(m*g*l*sin(error_roll)))/iyy) #; //alpha pendulum
+    alpha_roll = degress(alpha_roll)
+    # std::cout<< "alpha pitch : " << alpha_pitch << std::endl;
+    pos_roll = (error_roll_dt*Ts + 0.5*alpha_roll*Ts*Ts) #; //posisi GMBB
+    vel_roll = (error_roll_dt+alpha_roll*Ts)#; //kecepatan GLBB
+    if base==-1:
+        ankle_roll=dxl[17].prevGoalDegree-pos_roll
+        dxl[17].moveSync(ankle_roll,vel_roll,dxl[17].prevGoal,time_type='omega',read=0)
+    elif base==1:
+        ankle_roll=dxl[16].prevGoalDegree-pos_roll
+        dxl[16].moveSync(ankle_roll,vel_roll,dxl[16].prevGoal,time_type='omega',read=0)
+
+    # ankle_pitch = ankle_pitch;
+    # std::cout<< "ankle_pitch : " << ankle_pitch << std::endl;
+    # pitch_prev = pitch_now;
+    # // f = fuzzy(error, error_dt);
+    # return ankle_pitch;
+
 def tuningLQRdiskrit(condition):
 
     ###dengan baterai
@@ -1627,6 +1904,18 @@ def tuningLQRdiskrit(condition):
         Q = np.array([[1100,0,0,0], #roll kanan
                     [0,0.1,0,0], 
                     [0,0,800,0], #pitch kanan
+                    [0,0,0,1]])
+
+    elif condition=='walk2.5': #kiri rey
+        Q = np.array([[800,0,0,0], #roll kiri
+                    [0,1,0,0], 
+                    [0,0,600,0], #pitch kiri
+                    [0,0,0,1]])
+
+    elif condition=='walk3': #kanan rey
+        Q = np.array([[800,0,0,0], #roll kanan
+                    [0,0.1,0,0], 
+                    [0,0,600,0], #pitch kanan
                     [0,0,0,1]])
 
     elif condition=='translation roll':
@@ -1683,6 +1972,58 @@ def tuningLQRdiskrit(condition):
     # K, S, E = ctl.lqr(A,B, Q, R)
     # #----------------------------------------------------------------
     return Q,K
+
+def tuningLQRimu(condition):
+
+    #tanpa baterai
+    m=1.634 #(kg)
+    g=9.80665 #m/s^2
+    l=0.19614907857545497 #meter
+    ixx=0.084143172
+    iyy=0.079494614
+    izz=0.00757168
+
+    A = np.array([[0,1,0,0],[m*g*l/ixx, 0, 0, 0],[0, 0, 0, 1],[0 ,0, m*g*l/iyy, 0]])
+    B = np.array([[0 ,0],[1/ixx ,0],[0,0],[0 ,1/iyy]])
+    C = np.array([[1, 0, 0 ,0],[0, 0 ,0 ,0],[0, 0 ,1 ,0],[0, 0 ,0 ,0]])
+    D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
+
+    if condition=='imu1':
+        Qimu = np.array([[1000,0,0,0], #roll kiri
+                    [0,1,0,0], 
+                    [0,0,600,0], #pitch kiri
+                    [0,0,0,1]])
+
+    elif condition=='imu2':
+        Qimu = np.array([[1100,0,0,0], #roll kanan
+                    [0,0.1,0,0], 
+                    [0,0,800,0], #pitch kanan
+                    [0,0,0,1]])     
+
+    R = np.array([[1,0],[0,1]])
+
+    # ##ubah ke discrete dengan kembalian berupa state space method zoh
+    # sys = signal.StateSpace(A, B, C, D)
+    # sysd= sys.to_discrete(0.1)
+    # print("sysd",sysd)
+
+    ##ubah ke discrete dengan kembalian berupa A,B,C,D,dt methode zoh
+    sysd=signal.cont2discrete((A,B,C,D),0.1)
+    A,B,C,D=sysd[0],sysd[1],sysd[2],sysd[3]
+    print(A,B,C,D)
+
+    ##------------mencari K dari system discrete----------------------
+    ## first, solve the ricatti equation
+    P = np.matrix(scipy.linalg.solve_discrete_are(A, B, Qimu, R))
+    # compute the LQR gain
+    Kimu = np.matrix(scipy.linalg.inv(B.T*P*B+R)*(B.T*P*A))
+    # print("K",K)
+    #----------------------------------------------------------------
+
+    # #-----------mencari K dari system continue-----------------------
+    # K, S, E = ctl.lqr(A,B, Q, R)
+    # #----------------------------------------------------------------
+    return Qimu,Kimu
 
 def cntTransPitch(robot,dxl,base,K,t,condition='normal'):
 

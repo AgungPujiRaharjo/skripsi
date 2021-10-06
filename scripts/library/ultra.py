@@ -1,27 +1,18 @@
-#!/usr/bin/env python3
-
-import rospy
-import sys
+#Libraries
 import RPi.GPIO as GPIO
-from std_msgs.msg import String
 import time
-import math
-
-rospy.init_node('ultrasonic',anonymous=False)
-rate=rospy.Rate(10)
-pub=rospy.Publisher('ultrasonic_data',String,queue_size=1)
-
+ 
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
-
+ 
 #set GPIO Pins
 GPIO_TRIGGER = 23
 GPIO_ECHO = 24
-
+ 
 #set GPIO direction (IN / OUT)
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
 GPIO.setup(GPIO_ECHO, GPIO.IN)
-
+ 
 def distance():
     # set Trigger to HIGH
     GPIO.output(GPIO_TRIGGER, True)
@@ -48,12 +39,15 @@ def distance():
     distance = (TimeElapsed * 34300) / 2
  
     return distance
-
-
-while not rospy.is_shutdown():
-    dist = distance()
-    # print ("Measured Distance = %.1f cm" % dist)
-    # string_msg="%f" %(dist)
-    string_msg = str(distance())
-    pub.publish(string_msg)
-    rate.sleep()
+ 
+if __name__ == '__main__':
+    try:
+        while True:
+            dist = distance()
+            print ("Measured Distance = %.1f cm" % dist)
+            time.sleep(1)
+ 
+        # Reset by pressing CTRL + C
+    except KeyboardInterrupt:
+        print("Measurement stopped by User")
+        GPIO.cleanup()

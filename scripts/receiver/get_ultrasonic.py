@@ -4,16 +4,18 @@ import rospy
 from std_msgs.msg import String
 from program.srv import GetUltrasonicData,GetUltrasonicDataResponse
 
-dataultrasonic={}
+dataultrasonic={"jarak10":0}
 
 def callback_ultrasonic(msg):
-    print(msg)
+    data = float(msg.data)
+    dataultrasonic["jarak10"] = data
+    # print(msg)
 
 def service_callback(req):
     rospy.loginfo("receive request to get ultrasonic data")
     resp=GetUltrasonicDataResponse()
 
-    resp.ultrasonic_data.data="%f" % (dataUltrasonic["cm"])
+    resp.ultrasonic_data.data="%f" % (dataultrasonic["jarak10"])
     return resp
 
 rospy.init_node('ultrasonic_server',anonymous=True)

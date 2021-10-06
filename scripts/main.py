@@ -2,6 +2,9 @@
 
 #sudo chmod a+rw /dev/ttyUSB0
 #source devel/setup.bash
+#cd /dev
+#sudo chmod og+rwx gpio*
+
 import rospy
 import os
 import time
@@ -72,27 +75,48 @@ TORQUE_DISABLE              = 0                 # Value for disabling the torque
 
 ##-----------------------Posisi default-----------------------------------
 hip = 0
-eng = 0
+eng = 5
 
+#---------------------------------default ku------------------
+# dxl.append(servo.Servo(205,1,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(818,2,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(279,3,portHandler,packetHandler))
+# dxl.append(servo.Servo(744,4,portHandler,packetHandler))
+# dxl.append(servo.Servo(462,5,portHandler,packetHandler))
+# dxl.append(servo.Servo(561,6,portHandler,packetHandler))
+# dxl.append(servo.Servo(358,7,portHandler,packetHandler))
+# dxl.append(servo.Servo(658,8,portHandler,packetHandler)) #666
+# dxl.append(servo.Servo(516,9,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(516,10,portHandler,packetHandler))
+# dxl.append(servo.Servo(508-hip,11,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(508+hip,12,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(513,13,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(513,14,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(518+eng,15,portHandler,packetHandler))  #515
+# dxl.append(servo.Servo(502-eng,16,portHandler,packetHandler)) #505
+# dxl.append(servo.Servo(516,17,portHandler,packetHandler)) 
+# dxl.append(servo.Servo(516,18,portHandler,packetHandler))
+
+
+##-----------------------Posisi default reyhan-------------
 dxl.append(servo.Servo(205,1,portHandler,packetHandler)) 
 dxl.append(servo.Servo(818,2,portHandler,packetHandler)) 
 dxl.append(servo.Servo(279,3,portHandler,packetHandler))
 dxl.append(servo.Servo(744,4,portHandler,packetHandler))
 dxl.append(servo.Servo(462,5,portHandler,packetHandler))
 dxl.append(servo.Servo(561,6,portHandler,packetHandler))
-dxl.append(servo.Servo(358,7,portHandler,packetHandler))
-dxl.append(servo.Servo(658,8,portHandler,packetHandler)) #666
-dxl.append(servo.Servo(516,9,portHandler,packetHandler)) 
-dxl.append(servo.Servo(516,10,portHandler,packetHandler))
-dxl.append(servo.Servo(508-hip,11,portHandler,packetHandler)) 
-dxl.append(servo.Servo(508+hip,12,portHandler,packetHandler)) 
+dxl.append(servo.Servo(365,7,portHandler,packetHandler)) #358
+dxl.append(servo.Servo(658,8,portHandler,packetHandler)) #658
+dxl.append(servo.Servo(516,9,portHandler,packetHandler)) #516
+dxl.append(servo.Servo(516,10,portHandler,packetHandler)) #516
+dxl.append(servo.Servo(515-hip,11,portHandler,packetHandler)) #508
+dxl.append(servo.Servo(505+hip,12,portHandler,packetHandler)) #508
 dxl.append(servo.Servo(513,13,portHandler,packetHandler)) 
 dxl.append(servo.Servo(513,14,portHandler,packetHandler)) 
 dxl.append(servo.Servo(518+eng,15,portHandler,packetHandler))  #515
-dxl.append(servo.Servo(502-eng,16,portHandler,packetHandler)) #505
+dxl.append(servo.Servo(505-eng,16,portHandler,packetHandler)) #505
 dxl.append(servo.Servo(516,17,portHandler,packetHandler)) 
-dxl.append(servo.Servo(516,18,portHandler,packetHandler))
-
+dxl.append(servo.Servo(512,18,portHandler,packetHandler)) #516
 
 # Initialize GroupSyncWrite instance
 groupSyncWrite = GroupSyncWrite(portHandler, packetHandler, ADDR_AX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
@@ -119,7 +143,7 @@ else:
 # # Enable Dynamixel#1 Torque
 robot.cekServo(ADDR_AX_TORQUE_ENABLE,TORQUE_ENABLE)
 
-##----------------------------------------gerakin default-------------------------------
+# ##----------------------------------------gerakin default-------------------------------
 while 1:
     print("=========default====================")
     print("Press any key to continue! (or press ESC to quit!)")
@@ -140,12 +164,12 @@ while 1:
             indexMoving = indexMoving + i
     end = time.time()
     print("waktu: ", end - start)
-###--------------------------------------------------------------------------------------
+# ###--------------------------------------------------------------------------------------
 
 # -------------------------------default virtual---------------------------------
 # for obj in dxl :
 #     obj.moveSync(obj.default, 2,0,type='reg',read=0)
-# # ##-------------------------------------------------------------------------------
+# ##-------------------------------------------------------------------------------
 
 #=============================coba pola LQR virtual==============
 # invers(robot,dxl,'ki',0,0,20,1)
@@ -278,9 +302,14 @@ while 1:
 #     sh.cell(row=i+1,column=10,value=KSave[i])
 
 # wb.save(loc)
-# ##              -----------------------------------------------------------------------------------------
+# ##              -------------------------------------------------------------------------------------
+# ==============ULTRASONIC=======================
+# while(1):
+#     blaw=getUltrasonic()
+#     print (blaw)
+#     wait(1)
 
-##=============================coba pola dengan kendali LQR dipake==============
+#========================BERHENTI===========================
 invers(robot,dxl,'ki',0,0,20,1)
 invers(robot,dxl,'ka',0,0,20,1)
 robot.syncWrite()
@@ -305,14 +334,14 @@ while(1):
         break
 
 firstStep=1
-xGoal=[3,3,3,3] #,2,2,2,2,2,2,2,2] #5 langkah
+xGoal=[3,3,3,3,3,3] #,2,2,2,2,2,2,2,2] #5 langkah
 n=0
 base=-1 # -1 base kaki kiri, 1 base kaki kanan
 tsmp=0.1 #waktu sampling
 tsup=2 #waktu total satu langkah
 lastStep=0
-Q,K1=tuningLQRdiskrit('walk') #tuning LQR untuk mendapatkan nilai K
-Q,K2=tuningLQRdiskrit('walk2') #tuning LQR untuk mendapatkan nilai K
+Q,K1=tuningLQRdiskrit('walk2.5') #tuning LQR untuk mendapatkan nilai K
+Q,K2=tuningLQRdiskrit('walk3') #tuning LQR untuk mendapatkan nilai K
 
 allPttrnXt=[]
 allPttrnYt=[]
@@ -352,7 +381,7 @@ while(1):
     currentMicros=micros()
     t=currentMicros-firstMicros
 
-    walkUpdaterey(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
+    walkUpdaterey2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
     Controlrey(robot,dxl,base,t,K)
     robot.syncWrite()
 
@@ -370,6 +399,10 @@ while(1):
     
     # allTime.append((t/1000)+tp)
     #---------------------------------------------------
+
+    blaw=getUltrasonic()
+    if blaw<=6:
+        break
 
     t2=time.time()
     print("waktu dibutuhkan:",t2-t1)
@@ -474,9 +507,227 @@ axs[1].grid()
 axs[1].set_xlabel("time (ms)")
 axs[1].set_ylabel("COM Y (mm)")
 #--------------------------------------------------------
-
 plt.savefig('./src/program/data/data plot com vs ref com.png')
-# # ##======================================================================
+
+
+Qimu,Kimu=tuningLQRdiskrit('imu1') #tuning LQR untuk mendapatkan nilai K
+tsmp=0.1 #waktu sampling
+firstMicros=micros()
+
+while(1):
+
+    currentMicros=micros()
+    t=currentMicros-firstMicros
+    t1=time.time()
+    getMpu()
+    feedback_pitch(robot,dxl,Kimu,base)
+    feedback_roll(robot,dxl,Kimu,base)
+    robot.syncWrite()
+
+    t2=time.time()
+    print("waktu dibutuhkan:",t2-t1)
+    wait(0.1)
+    
+    
+# # ##=
+
+# ##=============================coba pola dengan kendali LQR dipake==============
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# robot.syncWrite()
+# wait(1.5)
+
+# resCOM=COM(robot,dxl,'ki')
+# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
+# # comDef["x"]=comDef["x"]+3
+
+# comDefKi=comDef["x"]+3.5
+# comDefKa=comDef["x"]+4 #+5 com saat itu posisi nya kurang pas
+
+# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+# state1Pitch=arctan(comNow["x"]/comNow["z"])
+# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+# while(1):
+#     inp=input("========press 'enter' to walk, 'i' to init invers = ")
+#     if inp=="":
+#         break
+
+# firstStep=1
+# xGoal=[3,3,3,3] #,2,2,2,2,2,2,2,2] #5 langkah
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+# lastStep=0
+# Q,K1=tuningLQRdiskrit('walk2.5') #tuning LQR untuk mendapatkan nilai K
+# Q,K2=tuningLQRdiskrit('walk3') #tuning LQR untuk mendapatkan nilai K
+
+# allPttrnXt=[]
+# allPttrnYt=[]
+# allCOMx=[]
+# allCOMy=[]
+# allCOMz=[]
+# allTime=[]
+# QSave=["Q"]
+# KSave=["K"]
+# tp=0
+# fwdDef["x"]=fwdNow["x"]
+
+# allxBase=[]
+# allxSwing=[]
+# allxPattern=[]
+# alltBase=[]
+# allxFwd=[]
+
+# t=0
+# pttrn["Xt"]=comDef["x"]
+# pttrn["Yt"]=(-base)*comDef["y"]
+# allPttrnXt.append(pttrn["Xt"])
+# allPttrnYt.append(pttrn["Yt"])
+# allTime.append(t)
+
+# firstMicros=micros()
+
+# while(1):
+#     if base==-1:
+#         K=K1
+#         comDef["x"]=comDefKi
+#     elif base==1:
+#         K=K2
+#         comDef["x"]=comDefKa
+
+#     t1=time.time()
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+
+#     walkUpdaterey2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
+#     Controlrey(robot,dxl,base,t,K)
+#     robot.syncWrite()
+
+#     #------------himpun untuk plot com------------------
+#     allPttrnXt.append(pttrn["Xt"])
+#     allPttrnYt.append(pttrn["Yt"])
+#     allCOMx.append(comNow["x"])
+#     allCOMy.append(comNow["y"])
+#     allCOMz.append(comNow["z"])
+#     if t>tsup*1000000:
+#         tapnd=tsup*1000000
+#         allTime.append((tapnd/1000)+tp)
+#     else:
+#         allTime.append((t/1000)+tp)
+    
+#     # allTime.append((t/1000)+tp)
+#     #---------------------------------------------------
+
+#     t2=time.time()
+#     print("waktu dibutuhkan:",t2-t1)
+#     # wait(0.021)
+#     wait(0.001)
+
+#     # jika satu langkah telah berakhir
+#     if t/1000000>=tsup +0.08: 
+#         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
+#         base=base*(-1) # switch kaki tumpu
+#         wait(0.8)
+
+#         #forward
+#         if base==-1: #tumpuan kaki kiri
+#             resCOM=COM(robot,dxl,'ki',readAll_leg='base')
+#             pttrn["comXinit"]=resCOM[0]
+#             res=forward(robot,dxl,'ki')
+#             fwdDef["x"]=res[0]
+#             print("comXInit:",pttrn["comXinit"]) #pattern nya menginisialisasi com sekarang untuk langkah selanjutnya
+           
+#         elif base==1: #tumpuan kaki kanan
+#             resCOM=COM(robot,dxl,'ka',readAll_leg='base')
+#             pttrn["comXinit"]=resCOM[0]
+#             res=forward(robot,dxl,'ka')
+#             fwdDef["x"]=res[0]
+#             print("comXInit:",pttrn["comXinit"])
+#             # print("fwd last",res)
+
+#         state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+#         state1Pitch=arctan(comNow["x"]/comNow["z"])
+#         controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+
+#         firstMicros=micros() #perbaharui waktu dari awal (0 detik)
+#         firstStep=0 # bukan awal langkah lagi      
+#         n+=1
+#         tp+=tsup*1000
+#         if n==(len(xGoal))-1:
+#             # lastStep=1 
+#             print("yuhu everybody") 
+
+#         if n>(len(xGoal))-1:
+#             break
+
+# if base==-(-1): #base terakhir sebelum switch kaki
+#     COM(robot,dxl,'ki',readAll_leg='base')
+# elif base==-(1):
+#     COM(robot,dxl,'ka',readAll_leg='base')
+
+# allCOMx.append(comNow["x"])
+# allCOMy.append(comNow["y"])
+# allCOMz.append(comNow["z"])
+
+# QSave.append(Q[0,0])
+# QSave.append(Q[1,1])
+# QSave.append(Q[2,2])
+# QSave.append(Q[3,3])
+# KSave.append(K[0,0])
+# KSave.append(K[0,1])
+# KSave.append(K[1,2])
+# KSave.append(K[1,3])
+
+# ###-------------------------------data control LQR (com)--------------------------------
+# #masukin semua data ke excel
+# df = pd.DataFrame({'waktu':allTime,'Xt':allPttrnXt,'Yt':allPttrnYt,'Zt':allCOMz,'COMx':allCOMx,'COMy':allCOMy,'COMz':allCOMz})
+# filename="comRead_vs_refCOM-coba"
+# loc='./src/program/data/%s.xlsx' % (filename)
+# df.to_excel(loc, index=True)
+# print("data diinput ke excel bernama : %s.xlsx" % filename)
+
+# # print("Q",Q)
+# print("K",K)
+
+# wb=load_workbook(loc)
+# sh=wb.worksheets[0]
+
+# for i in range(len(QSave)):
+#     sh.cell(row=i+1,column=9,value=QSave[i])
+
+# for i in range(len(KSave)):
+#     sh.cell(row=i+1,column=10,value=KSave[i])
+
+# wb.save(loc)
+
+# #------------------------------------plot com----------------------------------
+# fig, axs = plt.subplots(2)
+# fig.tight_layout(pad=2.0)
+
+# #--------jika ingin grafik dalam bentuk com-----------
+# axs[0].set_title('sumbu X',loc="left")
+# axs[0].plot(allTime,allPttrnXt,"g",label='COM Referensi')
+# axs[0].plot(allTime,allCOMx,"r",label="COM Dibaca")
+# axs[0].legend(loc="lower right")
+# axs[0].grid()
+# axs[0].set_xlabel("time (ms)")
+# axs[0].set_ylabel("COM X (mm)")
+
+# axs[1].set_title('sumbu Y',loc="left")
+# axs[1].plot(allTime,allPttrnYt,"g",label='COM Referensi')
+# axs[1].plot(allTime,allCOMy,"r",label="COM Dibaca")
+# axs[1].legend(loc="upper left")
+# axs[1].grid()
+# axs[1].set_xlabel("time (ms)")
+# axs[1].set_ylabel("COM Y (mm)")
+# #--------------------------------------------------------
+
+# plt.savefig('./src/program/data/data plot com vs ref com.png')
+# # # ##======================================================================
 
 # # -----------------------------------coba pola dengan LQR---------------------------------
 # invers(robot,dxl,'ki',0,0,20,1)
