@@ -9,7 +9,7 @@ import time
 import math
 
 rospy.init_node('imu_mpu6050',anonymous=False)
-rate=rospy.Rate(50)
+rate=rospy.Rate(10)
 pub=rospy.Publisher('mpu_data',String,queue_size=1)
 
 global kalmanX, kalmanY
@@ -29,10 +29,9 @@ def init_IMU():
     accZ = AcGy[2]
 
     print("acc x = ", round(accX,3), " acc y = ", round(accY,3), " acc z = ", round(accZ,3))
-    
-    #dibalik
-    pitch = math.atan2(-accX,accZ) * radToDeg
-    roll = math.atan2(accY,accZ) * radToDeg
+
+    roll = math.atan2(-accY,accZ) * radToDeg
+    pitch = math.atan2(accX,accZ) * radToDeg
 
     print("Roll awal = ",roll)
     print("Pitch awal = ",pitch)
@@ -85,10 +84,10 @@ def get_robot_ori(timer, zeroX, zeroY, kalAngleX, kalAngleY, init_roll, init_pit
     dt = time.time() - timer
     timer = time.time()
 
-    pitch = math.atan2(-accX,accZ) * radToDeg
-    roll = math.atan2(accX,accZ) * radToDeg
+    roll = math.atan2(-accY,accZ) * radToDeg
+    pitch = math.atan2(accX,accZ) * radToDeg
         
-    print("roll = ", round(roll, 3), " pitch = ", round(pitch, 3), " gyroX = ", round(gyroX, 3), " gyroY = ", round(gyroY, 3))
+    # print("roll = ", round(roll, 3), " pitch = ", round(pitch, 3), " gyroX = ", round(gyroX, 3), " gyroY = ", round(gyroY, 3))
 
     gyroXRate = gyroY
     gyroYRate = gyroX

@@ -1802,36 +1802,36 @@ def feedback_pitch(robot,dxl,Kimu,base):
     ixx=0.092026292
     K_pitch = Kimu[1,2]  
     K_dot_pitch = Kimu[1,3]
-    # static double ankle_pitch,pitch_prev;
-    # double ref_pitch,pitch_now,error_pitch,error_pitch_dt;
-    # double u_Pitch, alpha_pitch,pos_pitch,vel_pitch;
-    Ts = 0.02 #waktu sampling
+    Ts = 0.1  #waktu sampling
     
-    ref_pitch = 0 
+    ref_pitch = 0
     pitch_now = radians(imuData["pitch"]) #pembacaan sudut pitch saat ini yang didapat dari imu
-    # std::cout<< "rad pitch : " << imu_pitch << std::endl;
-    error_pitch = pitch_now - ref_pitch #error pembacaan imu
+  
+    error_pitch = ref_pitch - pitch_now
+ 
+    # error_pitch = pitch_now - ref_pitch #error pembacaan imu
+    # print("error pitch : ", error_pitch)
     error_pitch_dt = error_pitch/Ts 
-    # std::cout<< "error pitch : " << error_pitch << std::endl;
 
     u_Pitch = ((-K_pitch*(error_pitch-ref_pitch))+(-K_dot_pitch*error_pitch_dt)) #//fullstate feedback
     alpha_pitch = ((u_Pitch+(m*g*l*sin(error_pitch)))/ixx) #; //alpha pendulum
-    alpha_pitch = degress(alpha_pitch)
-    # std::cout<< "alpha pitch : " << alpha_pitch << std::endl;
-    pos_pitch = (error_pitch_dt*Ts + 0.5*alpha_pitch*Ts*Ts) #; //posisi GMBB
-    vel_pitch = (error_pitch_dt+alpha_pitch*Ts)#; //kecepatan GLBB
+    alpha_pitch = degrees(alpha_pitch)
+    pos_pitch = (error_pitch_dt*Ts + (0.5*alpha_pitch*Ts*Ts)) #; //posisi GMBB
+    # print("pos pitch : ",pos_pitch)
+    vel_pitch = abs(degrees(error_pitch_dt)+(alpha_pitch*Ts))#; //kecepatan GLBB
+    # print("vel pitch : ", vel_pitch)
     if base==-1:
-        ankle_pitch=dxl[15].prevGoalDegree-pos_pitch
+        t16=robot.readOne(16)
+        ankle_pitch=t16-pos_pitch   #tadinya - (kebalik arahnya)
         dxl[15].moveSync(ankle_pitch,vel_pitch,dxl[15].prevGoal,time_type='omega',read=0)
+        # robot.syncWrite()
     elif base==1:
-        ankle_pitch=dxl[14].prevGoalDegree-pos_pitch
+        t15=robot.readOne(15)
+        ankle_pitch=t15+pos_pitch
         dxl[14].moveSync(ankle_pitch,vel_pitch,dxl[14].prevGoal,time_type='omega',read=0)
+        # robot.syncWrite()
+    print("sudut pitch : ", ankle_pitch)
 
-    # ankle_pitch = ankle_pitch;
-    # std::cout<< "ankle_pitch : " << ankle_pitch << std::endl;
-    # pitch_prev = pitch_now;
-    # // f = fuzzy(error, error_dt);
-    # return ankle_pitch;
 
 def feedback_roll(robot,dxl,Kimu,base):
     m=1.634
@@ -1840,36 +1840,35 @@ def feedback_roll(robot,dxl,Kimu,base):
     iyy=0.087070843
     K_roll = Kimu[0,0]  
     K_dot_roll = Kimu[0,1]
-    # static double ankle_pitch,pitch_prev;
-    # double ref_pitch,pitch_now,error_pitch,error_pitch_dt;
-    # double u_Pitch, alpha_pitch,pos_pitch,vel_pitch;
-    Ts = 0.02 #waktu sampling
+    Ts = 0.1  #waktu sampling
     
-    ref_roll = 0 
+    ref_roll = 0
     roll_now = radians(imuData["roll"]) #pembacaan sudut pitch saat ini yang didapat dari imu
-    # std::cout<< "rad pitch : " << imu_pitch << std::endl;
-    error_roll = roll_now - ref_roll #error pembacaan imu
+  
+    error_roll = ref_roll - roll_now
+ 
+    # error_pitch = pitch_now - ref_pitch #error pembacaan imu
+    # print("error pitch : ", error_pitch)
     error_roll_dt = error_roll/Ts 
-    # std::cout<< "error pitch : " << error_pitch << std::endl;
 
     u_roll = ((-K_roll*(error_roll-ref_roll))+(-K_dot_roll*error_roll_dt)) #//fullstate feedback
     alpha_roll = ((u_roll+(m*g*l*sin(error_roll)))/iyy) #; //alpha pendulum
-    alpha_roll = degress(alpha_roll)
-    # std::cout<< "alpha pitch : " << alpha_pitch << std::endl;
-    pos_roll = (error_roll_dt*Ts + 0.5*alpha_roll*Ts*Ts) #; //posisi GMBB
-    vel_roll = (error_roll_dt+alpha_roll*Ts)#; //kecepatan GLBB
+    alpha_roll = degrees(alpha_roll)
+    pos_roll = (error_roll_dt*Ts + (0.5*alpha_roll*Ts*Ts)) #; //posisi GMBB
+    # print("pos pitch : ",pos_pitch)
+    vel_roll = abs(degrees(error_roll_dt)+(alpha_roll*Ts))#; //kecepatan GLBB
+    # print("vel pitch : ", vel_pitch)
     if base==-1:
-        ankle_roll=dxl[17].prevGoalDegree-pos_roll
+        t18=robot.readOne(18)
+        ankle_roll=t18+pos_roll   #tadinya - (kebalik arahnya)
         dxl[17].moveSync(ankle_roll,vel_roll,dxl[17].prevGoal,time_type='omega',read=0)
+        robot.syncWrite()
     elif base==1:
-        ankle_roll=dxl[16].prevGoalDegree-pos_roll
+        t17=robot.readOne(17)
+        ankle_roll=t17+pos_roll
         dxl[16].moveSync(ankle_roll,vel_roll,dxl[16].prevGoal,time_type='omega',read=0)
-
-    # ankle_pitch = ankle_pitch;
-    # std::cout<< "ankle_pitch : " << ankle_pitch << std::endl;
-    # pitch_prev = pitch_now;
-    # // f = fuzzy(error, error_dt);
-    # return ankle_pitch;
+        robot.syncWrite()
+    print("sudut roll : ", ankle_roll)
 
 def tuningLQRdiskrit(condition):
 
@@ -1989,15 +1988,15 @@ def tuningLQRimu(condition):
     D = np.array([[0 ,0],[0, 0],[0,0],[0,0]])
 
     if condition=='imu1':
-        Qimu = np.array([[1000,0,0,0], #roll kiri
+        Qimu = np.array([[10,0,0,0], #roll kiri
                     [0,1,0,0], 
-                    [0,0,600,0], #pitch kiri
+                    [0,0,50,0], #pitch kiri
                     [0,0,0,1]])
 
     elif condition=='imu2':
-        Qimu = np.array([[1100,0,0,0], #roll kanan
+        Qimu = np.array([[1,0,0,0], #roll kanan
                     [0,0.1,0,0], 
-                    [0,0,800,0], #pitch kanan
+                    [0,0,1,0], #pitch kanan
                     [0,0,0,1]])     
 
     R = np.array([[1,0],[0,1]])
