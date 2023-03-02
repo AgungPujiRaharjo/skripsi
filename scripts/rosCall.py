@@ -1375,7 +1375,7 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
             y2=yg*(0)
             if base==-1:
                 y2=0
-                x2=comDef["x"]
+                x2=comDef["x"]-1
             elif base==1:
                 y2=0
                 x2=comDef["x"]
@@ -1394,7 +1394,7 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
         t2=(tsup/2)+0.1
         y1=comYPolaPeriod[1]
         if firstStep==1:
-            y2=yg*0+1 #
+            y2=yg*0+1.5 #
             # Xt=comDef["x"]
             x1=comXPolaPeriod[1]
             # x2=comDef["x"]
@@ -1409,7 +1409,7 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
                 y2=1
                 x2=comDef["x"]
             elif base==1: #kanan
-                y2=0
+                y2=1 #0
                 x2=comDef["x"]
             
             Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
@@ -1430,7 +1430,7 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
         if firstStep==1:
             x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
             # x2=(xGoal*10/2)+(comDef["x"])
-            y2=yg*0 #
+            y2=yg*0
         else:
             x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
             
@@ -1471,7 +1471,7 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
                     y2=-yg*comDef["y"]-2
                     x2=(xGoal*10/2)+(comDef["x"])+5
                 elif base==1:
-                    y2=-yg*comDef["y"]-5
+                    y2=-yg*comDef["y"]-4#5
                     x2=(xGoal*10/2)+(comDef["x"])+5
             
             # y2=-yg*comDef["y"]
@@ -1531,6 +1531,206 @@ def walkUpdaterey2(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='nor
     print("================================================")
 
     # return Xt,Yt,sfx,sfy,sfz
+
+def walkUpdatedipake(robot,dxl,t,tsup,base,xGoal,firstStep,lastStep,condition='normal'):
+    
+    t=t/1000000 # ubah t dari microsecond ke second
+    
+    if base==-1: #base kaki kiri
+        yg=-1 #pengali untuk merubah kaki tumpuan
+        if condition=='normal':
+            COM(robot,dxl,'ki',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ki',readAll_leg='virtual')
+    elif base==1: #base kaki kanan
+        yg=1
+        if condition=='normal':
+            COM(robot,dxl,'ka',readAll_leg='base')
+        elif condition=='virtual':
+            COM(robot,dxl,'ka',readAll_leg='virtual')
+
+    pttrn["Zt"]=comNow["z"]
+
+    print("t:",t)
+
+    #periode 1
+    if t<=(tsup/4)+0.1:
+        if firstStep==1: #jika awal melangkah
+            t1=0
+            t2=tsup/4+0.1
+            y1=-yg*comDef["y"]
+            y2=yg*0 #
+            Xt=comDef["x"]
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        elif firstStep==0: #jika bukan awal melangkah
+          
+            t1=0
+            t2=tsup/4+0.1
+            x1=pttrn["comXinit"]
+            # x2=comDef["x"]
+            
+            y1=comNow["y"] #-1 karena ganti kaki tumpuan
+            y2=yg*(0)
+            if base==-1:
+                y2=0
+                x2=comDef["x"]
+            elif base==1:
+                y2=0
+                x2=comDef["x"]
+
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+         
+        comXPolaPeriod[1]=Xt
+        comYPolaPeriod[1]=Yt
+        print("==================Periode 1=====================")
+        
+    #periode 2
+    elif (t>(tsup/4)+0.1) and (t<=(tsup/2)+0.1):
+        
+        t1=(tsup/4)+0.1
+        t2=(tsup/2)+0.1
+        y1=comYPolaPeriod[1]
+        if firstStep==1:
+            y2=yg*0+1.5 #
+            # Xt=comDef["x"]
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            x2=(comDef["x"]+((xGoal*10/2)+comDef["x"]))/2
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        else:
+            x1=comXPolaPeriod[1]
+            # x2=comDef["x"]
+            # Xt=comDef["x"]
+            
+            if base==-1: #kiri
+                y2=1.5
+                x2=comDef["x"]
+            elif base==1: #kanan
+                y2=1.5 #0
+                x2=comDef["x"]
+            
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+        comXPolaPeriod[2]=Xt
+        comYPolaPeriod[2]=Yt
+
+        print("==================Periode 2=====================")
+    
+    #periode 3
+    elif (t>(tsup/2)+0.1) and (t<=(3*tsup/4)+0.15):
+        t1=(tsup/2)+0.1
+        t2=(3*tsup/4)+0.15
+
+        x1=comXPolaPeriod[2]
+        y1=comYPolaPeriod[2]
+        if firstStep==1:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            # x2=(xGoal*10/2)+(comDef["x"])
+            y2=yg #
+        else:
+            x2=((comDef["x"]+((xGoal*10/2)+comDef["x"]))/2)
+            
+            if base==-1: #kiri
+                y2=1
+            elif base==1: #kanan
+                y2=1
+        Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+        Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+
+        comXPolaPeriod[3]=Xt
+        comYPolaPeriod[3]=Yt
+        
+        print("==================Periode 3=====================")
+
+    # #periode 4
+    elif (t>(3*tsup/4)+0.15) and (t<=tsup+0.2):
+        
+        #jika bukan akhir langkah (akan melanjutkan berjalan kembali)
+        if lastStep==0:
+            
+            t1=(3*tsup/4)+0.15
+            t2=(tsup)+0.2
+            x1=comXPolaPeriod[3]
+            
+            y1=comYPolaPeriod[3]
+
+            if firstStep==1:
+                if base==-1:
+                    y2=-yg*comDef["y"]+2
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-5
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            elif firstStep==0:
+                if base==-1:
+                    y2=-yg*comDef["y"]-2
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+                elif base==1:
+                    y2=-yg*comDef["y"]-3
+                    x2=(xGoal*10/2)+(comDef["x"])+5
+            
+            # y2=-yg*comDef["y"]
+            Xt=round(((t-t1)/(t2-t1)*(x2-x1))+x1,3)
+            Yt=round(((t-t1)/(t2-t1)*(y2-y1))+y1,3)
+            
+        comXPolaPeriod[4]=Xt
+        comYPolaPeriod[4]=Yt
+        print("==================Periode 4=====================")
+
+
+    #-----------pattern swing------------------------
+    sH=2#tinggi maksimum langkah
+
+    if t<=(tsup/4):
+        sfx=(fwdDef["x"]/10)
+        sfy=0
+        sfz=0
+
+    elif t>(tsup/4):
+        t1=tsup/4
+        t2=tsup
+
+        sfx1=fwdDef["x"]/10 #posisi kaki awal sumbu x (cm)
+        sfx2=xGoal #posisi kaki tujuan
+
+        if t<=(5/8)*tsup: #3/2 dibagi 2, biar lebih mulus
+            tz1=tsup/4
+            tz2=((5/8)*tsup)
+            sfz1=pttrn["sfz"]
+            sfz2=sH
+        elif t>(5/8)*tsup:
+            tz1=((5/8)*tsup)
+            tz2=tsup+0.25
+            sfz1=pttrn["sfz"]
+            sfz2=0
+
+        sfy=0
+        sfx=round(((t-t1)/(t2-t1)*(sfx2-sfx1))+sfx1,3)
+        sfz=round(((t-tz1)/(tz2-tz1)*(sfz2-sfz1))+sfz1,3)
+        if sfz<0:
+            sfz=0
+    #---------------------------------------------------
+
+    pttrn["Xt"],pttrn["Yt"],pttrn["sfx"],pttrn["sfy"],pttrn["sfz"]=Xt,Yt,sfx,sfy,sfz
+
+    #for swing planning
+    # swngPlan["sfx"]=pttrn["sfx"]
+    
+    print("base kaki kiri" if base==-1 else "base kaki kanan" )
+    print("Xt=",Xt)
+    print("Yt=",Yt)
+    print("swing kaki kanan" if base==-1 else "swing kaki kiri" )
+    print("sfx=",sfx)
+    print("sfy=",sfy)
+    print("sfz=",sfz)
+    print("================================================")
+
+    # return Xt,Yt,sfx,sfy,sfz
+
 
 def Control(robot,dxl,base,t,condition='normal'):
     t=t/1000000 # ubah t dari microsecond ke second
@@ -1905,16 +2105,16 @@ def tuningLQRdiskrit(condition):
                     [0,0,800,0], #pitch kanan
                     [0,0,0,1]])
 
-    elif condition=='walk2.5': #kiri rey
+    elif condition=='walki': #kiri rey
         Q = np.array([[800,0,0,0], #roll kiri
                     [0,1,0,0], 
-                    [0,0,600,0], #pitch kiri
+                    [0,0,500,0], #pitch kiri
                     [0,0,0,1]])
 
-    elif condition=='walk3': #kanan rey
+    elif condition=='walka': #kanan rey
         Q = np.array([[800,0,0,0], #roll kanan
                     [0,0.1,0,0], 
-                    [0,0,600,0], #pitch kanan
+                    [0,0,550,0], #pitch kanan
                     [0,0,0,1]])
 
     elif condition=='translation roll':

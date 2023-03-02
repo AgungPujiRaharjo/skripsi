@@ -3,7 +3,7 @@
 #sudo chmod a+rw /dev/ttyUSB0
 #source devel/setup.bash
 #cd /dev
-#sudo chmod og+rwx gpio*
+#sudo chmod og+rwx gpio* tidak dipake
 
 import rospy
 import os
@@ -108,13 +108,13 @@ dxl.append(servo.Servo(561,6,portHandler,packetHandler))
 dxl.append(servo.Servo(365,7,portHandler,packetHandler)) #358
 dxl.append(servo.Servo(658,8,portHandler,packetHandler)) #658
 dxl.append(servo.Servo(516,9,portHandler,packetHandler)) #516
-dxl.append(servo.Servo(516,10,portHandler,packetHandler)) #516
-dxl.append(servo.Servo(515-hip,11,portHandler,packetHandler)) #508
-dxl.append(servo.Servo(505+hip,12,portHandler,packetHandler)) #508
+dxl.append(servo.Servo(525,10,portHandler,packetHandler)) #516 -kanan +kiri
+dxl.append(servo.Servo(513-hip,11,portHandler,packetHandler)) #508 #515
+dxl.append(servo.Servo(508+hip,12,portHandler,packetHandler)) #508 -belakang +depan #510
 dxl.append(servo.Servo(513,13,portHandler,packetHandler)) 
-dxl.append(servo.Servo(513,14,portHandler,packetHandler)) 
-dxl.append(servo.Servo(518+eng,15,portHandler,packetHandler))  #515
-dxl.append(servo.Servo(505-eng,16,portHandler,packetHandler)) #505
+dxl.append(servo.Servo(513,14,portHandler,packetHandler)) #513 -naik
+dxl.append(servo.Servo(510+eng,15,portHandler,packetHandler))  #515
+dxl.append(servo.Servo(500-eng,16,portHandler,packetHandler)) #505
 dxl.append(servo.Servo(516,17,portHandler,packetHandler)) 
 dxl.append(servo.Servo(512,18,portHandler,packetHandler)) #516
 
@@ -309,65 +309,65 @@ while 1:
 #     print (blaw)
 #     wait(1)
 
-#========================BERHENTI===========================
-invers(robot,dxl,'ki',0,0,20,1)
-invers(robot,dxl,'ka',0,0,20,1)
-robot.syncWrite()
-wait(1.5)
+#=====================================BERHENTI=======================================
+# invers(robot,dxl,'ki',0,0,20,1)
+# invers(robot,dxl,'ka',0,0,20,1)
+# robot.syncWrite()
+# wait(1.5)
 
-resCOM=COM(robot,dxl,'ki')
-comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
-print("comDef",comDef)
-wait(0.1)
-# comDef["x"]=comDef["x"]+3
+# resCOM=COM(robot,dxl,'ki')
+# comDef["x"],comDef["y"],comDef["z"],comDef["zt"]=resCOM[0],resCOM[1],resCOM[2],resCOM[2]
+# print("comDef",comDef)
+# wait(0.1)
+# # comDef["x"]=comDef["x"]+3
 
-comDefKi=comDef["x"]+3.5
-comDefKa=comDef["x"]+4 #+5 com saat itu posisi nya kurang pas
+# comDefKi=comDef["x"]+3.5
+# comDefKa=comDef["x"]+4 #+5 com saat itu posisi nya kurang pas
 
-state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
-state1Pitch=arctan(comNow["x"]/comNow["z"])
-controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
+# state1Roll=arctan(comNow["y"]/comNow["z"]) #masih dalam radian
+# state1Pitch=arctan(comNow["x"]/comNow["z"])
+# controlDict["rollBef"],controlDict["pitchBef"]=state1Roll,state1Pitch
 
-while(1):
-    inp=input("========press 'enter' to walk, 'i' to init invers = ")
-    if inp=="":
-        break
+# while(1):
+#     inp=input("========press 'enter' to walk, 'i' to init invers = ")
+#     if inp=="":
+#         break
 
-firstStep=1
-xGoal=[3,3,3,3,3,3] #,2,2,2,2,2,2,2,2] #5 langkah
-n=0
-base=-1 # -1 base kaki kiri, 1 base kaki kanan
-tsmp=0.1 #waktu sampling
-tsup=2 #waktu total satu langkah
-lastStep=0
-Q,K1=tuningLQRdiskrit('walk2.5') #tuning LQR untuk mendapatkan nilai K
-Q,K2=tuningLQRdiskrit('walk3') #tuning LQR untuk mendapatkan nilai K
+# firstStep=1
+# xGoal=[3,3,3,3,3,3] #,3,3,3,3,3] #5 langkah
+# n=0
+# base=-1 # -1 base kaki kiri, 1 base kaki kanan
+# tsmp=0.1 #waktu sampling
+# tsup=2 #waktu total satu langkah
+# lastStep=0
+# Q,K1=tuningLQRdiskrit('walki') #tuning LQR untuk mendapatkan nilai K
+# Q,K2=tuningLQRdiskrit('walka') #tuning LQR untuk mendapatkan nilai K
 
-allPttrnXt=[]
-allPttrnYt=[]
-allCOMx=[]
-allCOMy=[]
-allCOMz=[]
-allTime=[]
-QSave=["Q"]
-KSave=["K"]
-tp=0
-fwdDef["x"]=fwdNow["x"]
+# allPttrnXt=[]
+# allPttrnYt=[]
+# allCOMx=[]
+# allCOMy=[]
+# allCOMz=[]
+# allTime=[]
+# QSave=["Q"]
+# KSave=["K"]
+# tp=0
+# fwdDef["x"]=fwdNow["x"]
 
-allxBase=[]
-allxSwing=[]
-allxPattern=[]
-alltBase=[]
-allxFwd=[]
+# allxBase=[]
+# allxSwing=[]
+# allxPattern=[]
+# alltBase=[]
+# allxFwd=[]
 
-t=0
-pttrn["Xt"]=comDef["x"]
-pttrn["Yt"]=(-base)*comDef["y"]
-allPttrnXt.append(pttrn["Xt"])
-allPttrnYt.append(pttrn["Yt"])
-allTime.append(t)
+# t=0
+# pttrn["Xt"]=comDef["x"]
+# pttrn["Yt"]=(-base)*comDef["y"]
+# allPttrnXt.append(pttrn["Xt"])
+# allPttrnYt.append(pttrn["Yt"])
+# allTime.append(t)
 
-firstMicros=micros()
+# firstMicros=micros()
 
 # while(1):
 #     if base==-1:
@@ -381,7 +381,7 @@ firstMicros=micros()
 #     currentMicros=micros()
 #     t=currentMicros-firstMicros
 
-#     walkUpdaterey2(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
+#     walkUpdatedipake(robot,dxl,t,tsup,base,xGoal[n],firstStep,lastStep,condition='normal')
 #     Controlrey(robot,dxl,base,t,K)
 #     robot.syncWrite()
 
@@ -402,6 +402,7 @@ firstMicros=micros()
 
 #     blaw=getUltrasonic()
 #     if blaw<=6:
+#         print("Berhenti")
 #         break
 
 #     t2=time.time()
@@ -413,7 +414,7 @@ firstMicros=micros()
 #     if t/1000000>=tsup +0.08: 
 #         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
 #         base=base*(-1) # switch kaki tumpu
-#         wait(0.8)
+#         wait(1)
 
 #         #forward
 #         if base==-1: #tumpuan kaki kiri
@@ -510,33 +511,33 @@ firstMicros=micros()
 # plt.savefig('./src/program/data/data plot com vs ref com.png')
 
 
-Qimu,Kimu=tuningLQRimu('imu1') #tuning LQR untuk mendapatkan nilai K
-print("K imu : ",Kimu)
-tsmp=0.1 #waktu sampling
-firstMicros=micros()
+# Qimu,Kimu=tuningLQRimu('imu1') #tuning LQR untuk mendapatkan nilai K
+# print("K imu : ",Kimu)
+# tsmp=0.1 #waktu sampling
+# firstMicros=micros()
 
-while(1):
-
-    currentMicros=micros()
-    t=currentMicros-firstMicros
-    t1=time.time()
-    getMpu()
-    # print("get mpu pitch:",imuData["pitch"])
-    # print("get mpu pitch rad:",radians(imuData["pitch"]))
-    feedback_pitch(robot,dxl,Kimu,base=1)
-    feedback_pitch(robot,dxl,Kimu,base=-1)
-    # feedback_roll(robot,dxl,Kimu,base)
-    robot.syncWrite()
-    # t16=robot.readOne(16)#,data='float')
-    # print("t16:",t16)
-    t2=time.time()
-    # print("waktu dibutuhkan:",t2-t1)
-    wait(0.09)
+# while(1):
+#     currentMicros=micros()
+#     t=currentMicros-firstMicros
+#     t1=time.time()
+#     getMpu()
+#     # print("get mpu pitch:",imuData["pitch"])
+#     # print("get mpu pitch rad:",radians(imuData["pitch"]))
+#     feedback_pitch(robot,dxl,Kimu,base=1)
+#     feedback_pitch(robot,dxl,Kimu,base=-1)
+#     # feedback_roll(robot,dxl,Kimu,base)
+#     robot.syncWrite()
+#     # t16=robot.readOne(16)#,data='float')
+#     # print("t16:",t16)
+#     t2=time.time()
+#     # print("waktu dibutuhkan:",t2-t1)
+#     wait(0.09)
+#     break
     
     
 # # ##===============================
 
-# ##=============================coba pola dengan kendali LQR dipake==============
+# ##=============================coba pola dengan kendali LQR yg dipake==============
 # invers(robot,dxl,'ki',0,0,20,1)
 # invers(robot,dxl,'ka',0,0,20,1)
 # robot.syncWrite()
@@ -626,6 +627,10 @@ while(1):
     
 #     # allTime.append((t/1000)+tp)
 #     #---------------------------------------------------
+#     blaw=getUltrasonic()
+#     if blaw<=6:
+#         print("Berhenti")
+#         break
 
 #     t2=time.time()
 #     print("waktu dibutuhkan:",t2-t1)
@@ -636,7 +641,7 @@ while(1):
 #     if t/1000000>=tsup +0.08: 
 #         print("==========================langkah ke-"+ str(n+1)+" selesai===========================")
 #         base=base*(-1) # switch kaki tumpu
-#         wait(0.8)
+#         wait(1)
 
 #         #forward
 #         if base==-1: #tumpuan kaki kiri
@@ -732,7 +737,7 @@ while(1):
 # #--------------------------------------------------------
 
 # plt.savefig('./src/program/data/data plot com vs ref com.png')
-# # ##======================================================================
+##======================================================================
 
 # # -----------------------------------coba pola dengan LQR---------------------------------
 # invers(robot,dxl,'ki',0,0,20,1)

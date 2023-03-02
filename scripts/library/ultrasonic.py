@@ -52,7 +52,7 @@ def distance():
 
 while not rospy.is_shutdown():
     dist = distance()
-    # print ("Measured Distance = %.1f cm" % dist)
+    print ("Measured Distance = %.1f cm" % dist)
     # string_msg="%f" %(dist)
     string_msg = str(distance())
     pub.publish(string_msg)
